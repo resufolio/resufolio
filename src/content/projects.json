@@ -1,0 +1,166 @@
+{
+  "meta": {
+    "title": "Teles - Projects",
+    "description": "Projects developed by Teles, a Creative Software Engineer with over 11 years of experience in web development, focused on frontend technologies, and proficient in JavaScript, TypeScript, Node, Python, and more. Dedicated to SEO and UX, and have worked on products reaching millions of users in Brazil and numerous startup founders.",
+    "openGraph": {
+      "title": "Teles - Creative Software Engineer",
+      "description": "Projects developed by Teles, a Creative Software Engineer with over 11 years of experience in web development, focused on frontend technologies, and proficient in JavaScript, TypeScript, Node, Python, and more. Dedicated to SEO and UX, and have worked on products reaching millions of users in Brazil and numerous startup founders.",
+      "type": "website",
+      "author": "Teles",
+      "locale": "en_US",
+      "url": "https://teles.dev.br",
+      "site_name": "Teles Portfolio",
+      "images": [
+        {
+          "url": "https://teles.dev.br/images/ogimage.png",
+          "width": 1200,
+          "height": 630,
+          "alt": "Teles - Creative Software Engineer"
+        }
+      ]
+    }
+  },
+  "container": {
+    "bottom": "none",
+    "top": "none"
+  },
+  "sections": [
+    {
+      "container": {
+        "fullWidth": true
+      },
+      "columns": [
+        {
+          "components": [
+            {
+              "type": "Panel",
+              "props": {
+                "char": "👨‍💻",
+                "title": "Projects"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "container": {
+        "bottom": "md",
+        "top": "md"
+      },
+      "columns": [
+        {
+          "width": "full",
+          "components": [
+            {
+              "type": "Cards",
+              "props": {
+                "columns": "1/3",
+                "cards": [
+                  {
+                    "image": {
+                      "src": "/images/logos/example-card.svg",
+                      "width": 350,
+                      "height": 192,
+                      "alt": "Project 1 logo"
+                    },
+                    "title": "Project 1",
+                    "link": "/projects/example",
+                    "text": "A web application for managing tasks.",
+                    "tags": [
+                      "JavaScript",
+                      "React",
+                      "Node.js"
+                    ]
+                  },
+                  {
+                    "image": {
+                      "src": "/images/logos/example-card.svg",
+                      "width": 616,
+                      "height": 320,
+                      "alt": "Project 2"
+                    },
+                    "title": "Project 2",
+                    "link": "/projects/example",
+                    "text": "An e-commerce platform built with Next.js.",
+                    "tags": [
+                      "React",
+                      "Next.js",
+                      "Commerce"
+                    ]
+                  },
+                  {
+                    "image": {
+                      "src": "/images/logos/example-card.svg",
+                      "width": 616,
+                      "height": 320,
+                      "alt": "Project 3"
+                    },
+                    "title": "Project 3",
+                    "link": "/projects/example",
+                    "text": "A web application for managing tasks.",
+                    "tags": [
+                      "React",
+                      "Next.js",
+                      "Commerce"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "footer": [
+    {
+      "columns": [
+        {
+          "width": "full",
+          "components": [
+            {
+              "type": "LinkClouds",
+              "props": {
+                "logo": {
+                  "src": "/images/resufolio-icon.svg",
+                  "width": 80,
+                  "height": 80,
+                  "alt": "Resufolio logo"
+                },
+                "text": "**John Doe** is a fictional **Software Engineer** and this page is example content for [Resufolio](https://resufolio.github.io).\n\n Made using Resufolio.",
+                "linkColumns": [
+                  {
+                    "title": "Links",
+                    "links": [
+                      {
+                        "title": "Fork this project",
+                        "url": "https://github.com/johndoe/johndoe.github.io"
+                      },
+                      {
+                        "title": "Download my resume",
+                        "url": "#"
+                      },
+                      {
+                        "title": "Sponsor me on GitHub",
+                        "url": "https://github.com/sponsors/teles"
+                      },
+                      {
+                        "title": "Share this page on LinkedIn",
+                        "url": "https://www.linkedin.com/sharing/share-offsite/?url=resufolio.github.io"
+                      },
+                      {
+                        "title": "Report an issue",
+                        "url": "https://github.com/resufolio/resufolio.github.io/issues"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
