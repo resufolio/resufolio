@@ -4,6 +4,7 @@ import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea
 import { FaArrowsAlt, FaTrash } from 'react-icons/fa'
 import { RiGridLine } from "react-icons/ri"
 import { PiLego } from "react-icons/pi"
+import { FaTag } from "react-icons/fa6"
 
 const elementTypes = [
   { id: 'element-444', text: '4 4 4', elements: 'three-columns' },
@@ -22,6 +23,11 @@ interface Element {
   text: string;
   elements: string;
   customLayout?: number[];
+}
+
+interface Metadata {
+  title: string;
+  description: string;
 }
 
 const renderComponent = (el: Element) => {
@@ -61,6 +67,7 @@ const HomePage: React.FC = () => {
   const [elements, setElements] = useState<Element[]>([])
   const [customLayout, setCustomLayout] = useState<string>('12')
   const [sidebarTab, setSidebarTab] = useState<'metadata'| 'elements'>('elements')
+  const [metadata, setMetadata] = useState<Metadata>({ title: '', description: '' })
 
   const handleDragEnd = (result: DropResult) => {
     const { source, destination } = result
@@ -143,160 +150,185 @@ const HomePage: React.FC = () => {
   }
 
   return (
-    <DragDropContext onDragEnd={handleDragEnd}>
-      <main className="flex">
-        <Droppable droppableId="sidebar" isDropDisabled={true}>
-          {(provided) => (
-            <aside
-              ref={provided.innerRef}
-              {...provided.droppableProps}
-              className="w-48 bg-gray-800 text-gray-800"
-            >
-              <ul className='flex text-white text-[11px] py-3 leading-3 border-b border-gray-600 mb-3'>
-                <li
-                  onClick={() => setSidebarTab('elements')}
-                  className={`px-2 py-1 cursor-pointer hover:font-semibold ${sidebarTab === 'elements' ? 'font-bold' : ''}`}>
-                    Elements
-                </li>
-                <li
-                  onClick={() => setSidebarTab('metadata')}
-                  className={`px-2 py-1 cursor-pointer hover:font-semibold ${sidebarTab === 'metadata' ? 'font-bold' : ''}`}>
-                    Metadata
-                </li>
-              </ul>
-              {sidebarTab === 'elements' && <div className='px-2 text-sm'>
-                <section>
-                  <h3 className='text-white font-semibold mb-3 flex items-center'>
-                    <RiGridLine className='inline-block mr-2'/>
-                    <span>Grid system</span>
-                  </h3>
-                  {elementTypes.map((el, index) => (
-                    <Draggable draggableId={el.id} index={index} key={el.id} isDragDisabled={false}>
-                    {(provided, snapshot) => (
-                      <div>
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          className={`p-2 mb-2 bg-white rounded border ${snapshot.isDragging ? 'opacity-50' : 'opacity-100'}`}
-                        >
-                          {el.text === 'Custom' ? (
-                            <div className='inline-flex'>
-                              <input
-                                type="text"
-                                value={customLayout}
-                                onChange={(e) => setCustomLayout(e.target.value)}
-                                placeholder="Enter numbers"
-                                className="w-full p-1 border rounded"
-                              />
-                              <button className='bg-blue-400 pointer-events-none ml-2 rounded-lg text-white p-2 pointer-null text-xs font-semibold'>
-                                Grab
-                              </button>
+    <>
+      <title>Edit page</title>
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <main className="flex">
+          <Droppable droppableId="sidebar" isDropDisabled={true}>
+            {(provided) => (
+              <aside
+                ref={provided.innerRef}
+                {...provided.droppableProps}
+                className="w-48 bg-gray-800 text-gray-800 sticky top-0 max-h-screen overflow-y-auto"
+              >
+                <ul className='flex text-white text-[11px] py-3 leading-3 border-b border-gray-600 mb-3'>
+                  <li
+                    onClick={() => setSidebarTab('elements')}
+                    className={`px-2 py-1 cursor-pointer hover:font-semibold ${sidebarTab === 'elements' ? 'font-bold' : ''}`}>
+                      Elements
+                  </li>
+                  <li
+                    onClick={() => setSidebarTab('metadata')}
+                    className={`px-2 py-1 cursor-pointer hover:font-semibold ${sidebarTab === 'metadata' ? 'font-bold' : ''}`}>
+                      Metadata
+                  </li>
+                </ul>
+                {sidebarTab === 'elements' && <div className='px-2 text-sm'>
+                  <section>
+                    <h3 className='text-white font-semibold mb-3 flex items-center'>
+                      <RiGridLine className='inline-block mr-2'/>
+                      <span>Grid system</span>
+                    </h3>
+                    {elementTypes.map((el, index) => (
+                      <Draggable draggableId={el.id} index={index} key={el.id} isDragDisabled={false}>
+                        {(provided, snapshot) => (
+                          <div>
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              className={`p-2 mb-2 bg-white rounded border ${snapshot.isDragging ? 'opacity-50' : 'opacity-100'}`}
+                            >
+                              {el.text === 'Custom' ? (
+                                <div className='inline-flex'>
+                                  <input
+                                    type="text"
+                                    value={customLayout}
+                                    onChange={(e) => setCustomLayout(e.target.value)}
+                                    placeholder="Enter numbers"
+                                    className="w-full p-1 border rounded"
+                                  />
+                                  <button className='bg-blue-400 pointer-events-none ml-2 rounded-lg text-white p-2 pointer-null text-xs font-semibold'>
+                                    Grab
+                                  </button>
+                                </div>
+                              ) : (
+                                el.text
+                              )}
                             </div>
-                          ) : (
-                            el.text
-                          )}
-                        </div>
-                        {snapshot.isDragging && (
-                          <div
-                            className={`p-2 mb-2 bg-white rounded border ${snapshot.isDragging ? 'opacity-50' : 'opacity-100'}`}
-                          >
-                            {el.text === 'Custom' ? (
-                              <div className='inline-flex'>
-                                <input
-                                  type="text"
-                                  value={customLayout}
-                                  placeholder="Enter numbers"
-                                  className="w-full p-1 border rounded"
-                                  disabled
-                                />
-                                <button className='bg-blue-400 pointer-events-none ml-2 rounded-lg text-white p-2 pointer-null text-xs font-semibold'>
-                                  Grab
-                                </button>
+                            {snapshot.isDragging && (
+                              <div
+                                className={`p-2 mb-2 bg-white rounded border ${snapshot.isDragging ? 'opacity-50' : 'opacity-100'}`}
+                              >
+                                {el.text === 'Custom' ? (
+                                  <div className='inline-flex'>
+                                    <input
+                                      type="text"
+                                      value={customLayout}
+                                      placeholder="Enter numbers"
+                                      className="w-full p-1 border rounded"
+                                      disabled
+                                    />
+                                    <button className='bg-blue-400 pointer-events-none ml-2 rounded-lg text-white p-2 pointer-null text-xs font-semibold'>
+                                      Grab
+                                    </button>
+                                  </div>
+                                ) : (
+                                  el.text
+                                )}
                               </div>
-                            ) : (
-                              el.text
                             )}
                           </div>
                         )}
+                      </Draggable>
+                    ))}
+                  </section>
+                  <section className='mt-6'>
+                    <h3 className='text-white font-semibold mb-3 flex items-center'>
+                      <PiLego className='inline-block mr-2'/>
+                      <span>Components</span>
+                    </h3>
+                    {componentTypes.map((el, index) => (
+                      <Draggable draggableId={el.id} index={index} key={el.id}>
+                        {(provided, snapshot) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            className={`p-2 mb-2 bg-white rounded border ${snapshot.isDragging ? 'opacity-50' : 'opacity-100'}`}
+                          >
+                            {el.text}
+                          </div>
+                        )}
+                      </Draggable>
+                    ))}
+                  </section>
+                </div>}
+                {sidebarTab === 'metadata' && <div className='px-2 text-sm'>
+                  <section>
+                    <h3 className='text-white font-semibold mb-3 flex items-center'>
+                      <FaTag className='inline-block mr-2'/>
+                      <span>Base</span>
+                    </h3>
+                    <div className='mb-3 text-white'>
+                      <label className='block text-xs font-semibold mb-1'>Title</label>
+                      <textarea className='w-full p-1 border bg-slate-100 rounded-sm resize-none text-black' value={metadata.title} onChange={(e) => setMetadata({...metadata, title: e.target.value})} />
+                    </div>
+                    <div className='mb-3 text-white'>
+                      <label className='block text-xs font-semibold mb-1'>Meta description</label>
+                      <textarea className='w-full p-1 border bg-slate-100 rounded-sm resize-none text-black' value={metadata.description} onChange={(e) => setMetadata({...metadata, description: e.target.value})} />
+                    </div>
+                  </section>
+                  <section>
+                    <h3 className='text-white font-semibold mb-3 flex items-center'>
+                      <FaTag className='inline-block mr-2'/>
+                      <span>Open Graph</span>
+                    </h3>
+                  </section>
+                </div>}
+              </aside>
+            )}
+          </Droppable>
+          <Droppable droppableId="container">
+            {(provided) => (
+              <div
+                ref={provided.innerRef}
+                {...provided.droppableProps}
+                className={`flex-1 px-3 pt-10 bg-white min-h-screen border rounded-sm border-gray-300 m-2 relative
+                before:content-['Container'] before:absolute before:left-0 before:top-0 before:bg-gray-100 before:text-xs
+                before:font-semibold before:px-2 before:py-1 before:text-gray-500
+                before:rounded-br before:border-r before:border-b before:border-gray-300
+                `}
+              >
+                {elements.map((el, index) => (
+                  <Draggable key={el.id} draggableId={el.id} index={index}>
+                    {(provided) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        className={`relative p-2 overflow-hidden mb-2 rounded border pt-12 bg-gray-100 border-gray-300 shadow-inner
+                        before:absolute before:left-0 before:top-0 before:bg-gray-50 before:text-xs
+                        before:content-["Row"] before:font-semibold before:px-2 before:py-1 before:text-gray-500
+                        before:rounded-br before:border-b before:border-r before:border-gray-300
+                        `}
+                      >
+                        <div className='text-sm font-semibold'>
+                          <div className='ml-auto absolute top-2 right-2'>
+                            <div className="p-1 bg-sky-400 inline-flex items-center transition rounded text-white hover:bg-blue-500 hover:opacity-100 active:bg-blue-500 active:opacity-100 opacity-30 cursor-grab mr-2" {...provided.dragHandleProps}>
+                              <FaArrowsAlt />
+                              <span className='ml-1'>Drag</span>
+                            </div>
+                            <button
+                              onClick={() => handleDelete(index)}
+                              className="bg-red-400 inline-flex items-center hover:bg-red-500 opacity-30 hover:opacity-100 text-white rounded p-1 cursor-pointer"
+                            >
+                              <FaTrash/>
+                              <span className='ml-1'>Delete</span>
+                            </button>
+                          </div>
+                          {renderElement(el)}
+                        </div>
                       </div>
                     )}
                   </Draggable>
-                  ))}
-                </section>
-                <section className='mt-6'>
-                  <h3 className='text-white font-semibold mb-3 flex items-center'>
-                    <PiLego className='inline-block mr-2'/>
-                    <span>Components</span>
-                  </h3>
-                  {componentTypes.map((el, index) => (
-                    <Draggable draggableId={el.id} index={index} key={el.id}>
-                      {(provided, snapshot) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          className={`p-2 mb-2 bg-white rounded border ${snapshot.isDragging ? 'opacity-50' : 'opacity-100'}`}
-                        >
-                          {el.text}
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                </section>
-              </div>}
-            </aside>
-          )}
-        </Droppable>
-        <Droppable droppableId="container">
-          {(provided) => (
-            <div
-              ref={provided.innerRef}
-              {...provided.droppableProps}
-              className={`flex-1 px-3 pt-10 bg-white min-h-screen border rounded-sm border-gray-300 m-2 relative
-              before:content-['Container'] before:absolute before:left-0 before:top-0 before:bg-gray-100 before:text-xs
-              before:font-semibold before:px-2 before:py-1 before:text-gray-500
-              before:rounded-br before:border-r before:border-b before:border-gray-300
-              `}
-            >
-              {elements.map((el, index) => (
-                <Draggable key={el.id} draggableId={el.id} index={index}>
-                  {(provided) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                      className={`relative p-2 overflow-hidden mb-2 rounded border pt-12 bg-gray-100 border-gray-300 shadow-inner
-                      before:absolute before:left-0 before:top-0 before:bg-gray-50 before:text-xs
-                      before:content-["Row"] before:font-semibold before:px-2 before:py-1 before:text-gray-500
-                      before:rounded-br before:border-b before:border-r before:border-gray-300
-                      `}
-                    >
-                      <div className='text-sm font-semibold'>
-                        <div className='ml-auto absolute top-2 right-2'>
-                          <div className="p-1 bg-sky-400 inline-flex items-center transition rounded text-white hover:bg-blue-500 hover:opacity-100 active:bg-blue-500 active:opacity-100 opacity-30 cursor-grab mr-2" {...provided.dragHandleProps}>
-                            <FaArrowsAlt />
-                            <span className='ml-1'>Drag</span>
-                          </div>
-                          <button
-                            onClick={() => handleDelete(index)}
-                            className="bg-red-400 inline-flex items-center hover:bg-red-500 opacity-30 hover:opacity-100 text-white rounded p-1 cursor-pointer"
-                          >
-                            <FaTrash/>
-                            <span className='ml-1'>Delete</span>
-                          </button>
-                        </div>
-                        {renderElement(el)}
-                      </div>
-                    </div>
-                  )}
-                </Draggable>
-              ))}
-              {provided.placeholder}
-            </div>
-          )}
-        </Droppable>
-      </main>
-    </DragDropContext>
+                ))}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        </main>
+      </DragDropContext>
+    </>
   )
 }
 
