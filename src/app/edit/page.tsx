@@ -80,9 +80,9 @@ const HomePage: React.FC = () => {
       if (newElement) {
         const newElements = Array.from(elements)
         if (newElement.elements === 'custom') {
-          const elements = customLayout.split(' ').map(Number)
-          if (elements.reduce((a, b) => a + b, 0) === 12) {
-            newElements.splice(destination.index, 0, { ...newElement, id: `${newElement.id}-${elements.length + 1}`, customLayout: elements })
+          const columns = customLayout.split(' ').map(Number)
+          if (columns.reduce((a, b) => a + b, 0) === 12) {
+            newElements.splice(destination.index, 0, { ...newElement, id: `${newElement.id}-${elements.length + 1}`, customLayout: columns })
           } else {
             alert('The sum of the numbers must equal 12.')
           }
@@ -159,7 +159,7 @@ const HomePage: React.FC = () => {
               <aside
                 ref={provided.innerRef}
                 {...provided.droppableProps}
-                className="w-48 bg-gray-800 text-gray-800 sticky top-0 max-h-screen overflow-y-auto"
+                className="w-48 min-w-48 bg-gray-800 text-gray-800 sticky top-0 max-h-screen overflow-y-auto"
               >
                 <ul className='flex text-white text-[11px] py-3 leading-3 border-b border-gray-600 mb-3'>
                   <li
@@ -232,6 +232,7 @@ const HomePage: React.FC = () => {
                         )}
                       </Draggable>
                     ))}
+                    {provided.placeholder}
                   </section>
                   <section className='mt-6'>
                     <h3 className='text-white font-semibold mb-3 flex items-center'>
@@ -252,6 +253,7 @@ const HomePage: React.FC = () => {
                         )}
                       </Draggable>
                     ))}
+                    {provided.placeholder}
                   </section>
                 </div>}
                 {sidebarTab === 'metadata' && <div className='px-2 text-sm'>
