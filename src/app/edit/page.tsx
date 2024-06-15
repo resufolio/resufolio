@@ -43,7 +43,7 @@ const renderComponent = (el: Element) => {
 
 const Column: React.FC<{ className?: string, style?: React.CSSProperties, droppableId: string, element: Element }> = ({ className = '', style = {}, droppableId, element }) => (
   <Droppable droppableId={'column-' + droppableId}>
-    {(provided) => (
+    {(provided, snapshot) => (
       <div
         ref={provided.innerRef}
         {...provided.droppableProps}
@@ -57,7 +57,10 @@ const Column: React.FC<{ className?: string, style?: React.CSSProperties, droppa
       >
         <p>{JSON.stringify(element)}</p>
         {element && renderComponent(element)}
-        {provided.placeholder}
+        <div
+          className={`border border-dashed border-gray-200 m-2 rounded-lg transition ${snapshot.isDraggingOver ? 'opacity-100' : 'opacity-0'}`}>
+          {provided.placeholder}
+        </div>
       </div>
     )}
   </Droppable>
