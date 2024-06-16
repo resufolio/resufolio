@@ -132,7 +132,7 @@ const SectionRow: React.FC<SectionRowProps> = ({ columns, id, handleDelete }) =>
                 </div>
             <div className="flex">
                 {columns.map((column, index) => (
-                    <Column key={index} droppableId={`column-${index}`} width={column.width} />
+                    <Column key={index} droppableId={`column-${id}-${index}`} width={column.width} />
                 ))}
             </div>
             </section>
