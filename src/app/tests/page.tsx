@@ -49,7 +49,7 @@ interface RowSectionProps extends Row {
 const SidebarGrids: React.FC<{grids: Grid[]}> = ({grids}) => {
     return (
         <>
-            <Droppable droppableId={`sidebar-grids-droppable`} isDropDisabled={true} type="row">
+            <Droppable droppableId={`sidebar-grids-droppable`} isDropDisabled={true} type="row" isCombineEnabled={false}>
                 {(provided) => (
                     <div ref={provided.innerRef} {...provided.droppableProps} className="w-[192px]">
                         {grids.map((grid, index) => (
@@ -82,7 +82,7 @@ const SidebarGrids: React.FC<{grids: Grid[]}> = ({grids}) => {
 
 const RowSection: React.FC<RowSectionProps> = ({ id, columns, index }) => {
     return (
-        <Droppable droppableId={`droppable-row-${id}`}>
+        <Droppable droppableId={`droppable-row-${id}`} isCombineEnabled={false}>
             {(provided) => (
                 <div
                     className="border border-slate-300 w-full"
@@ -110,7 +110,7 @@ const RowSectionContent: React.FC<Row> = ({ id, columns }) => {
     return (
         <section className="inline-flex border border-slate-300 w-full">
         {columns.map((column, index) => (
-            <Droppable key={index} droppableId={`droppable-${id}-${index}`} type="component">
+            <Droppable key={index} droppableId={`droppable-${id}-${index}`} type="component" isCombineEnabled={false}>
                 {(provided) => (
                     <div
                         className={`border p-3 mb-5 rounded-lg user-select-none ${widthClassMap[column.width]}`}
@@ -167,14 +167,14 @@ const TestsPage = () => {
             const row: Row = gridToRow(grid, rows.length)
             setRows([...rows, row])
         }
-        // Reordering rows
-        else if(source.droppableId === 'container' && destination.droppableId === 'container') {
+        // Reordering rows inside the container
+        else if(source.droppableId.startsWith('droppable-row-') && destination.droppableId.startsWith('droppable-row-')) {
             const newRows = [...rows]
             const [removed] = newRows.splice(source.index, 1)
             newRows.splice(destination.index, 0, removed)
             setRows(newRows)
         }
-        console.log({ result, destination, source })
+        console.log({ destination, source })
     }
 
     return (
@@ -182,7 +182,7 @@ const TestsPage = () => {
             <DragDropContext onDragEnd={handleDragEnd}>
                 <aside className="border-b w-full py-2 flex-1 bg-slate-900">
                     <SidebarGrids grids={grids} />
-                    <Droppable droppableId="sidebar-components-droppable" isDropDisabled={true} type="component">
+                    <Droppable droppableId="sidebar-components-droppable" isDropDisabled={true} type="component" isCombineEnabled={false}>
                         {(provided) => (
                             <div ref={provided.innerRef} {...provided.droppableProps} className="w-[192px]">
                                 <Draggable draggableId="sidebar-components-draggable" index={0}>
@@ -202,7 +202,7 @@ const TestsPage = () => {
                     </Droppable>
                 </aside>
                 <div className="w-full flex-grow-0 p-4 min-h-screen">
-                    <Droppable droppableId="container" type="row">
+                    <Droppable droppableId="container" type="row" isCombineEnabled={false}>
                         {(provided) => (
                             <div
                                 className="border border-slate-300 w-full min-h-screen"
