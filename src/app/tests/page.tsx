@@ -197,7 +197,7 @@ const TestsPage = () => {
     }
 
     return (
-        <div className="bg-white p-3 flex">
+        <div className="bg-white p-3 flex min-h-screen">
             <DragDropContext onDragEnd={handleDragEnd}>
                 <aside className="border-b w-full py-2 flex-1">
                     <SidebarGrids />
@@ -220,7 +220,7 @@ const TestsPage = () => {
                         )}
                     </Droppable>
                 </aside>
-                <div className="w-full flex-grow-0 p-4">
+                <div className="w-full flex-grow-0 p-4 min-h-screen">
                     <Droppable droppableId="droppable" type="row">
                         {(provided) => (
                             <div
