@@ -2,6 +2,8 @@
 import { DragDropContext, Draggable, Droppable, DropResult } from "@hello-pangea/dnd"
 import { useState } from "react"
 import { FaGripVertical } from "react-icons/fa"
+import { PiLego } from "react-icons/pi"
+import { RiGridLine } from "react-icons/ri"
 
 /**
 * Mapping of numbers to tailwind classes representing width values.
@@ -61,6 +63,65 @@ const dndId = {
     parse: (id: string) => JSON.parse(id) as DnDId<DnDIdType>,
     stringify: (id: DnDId<DnDIdType>) => JSON.stringify(id),
 }
+/**
+* DraggableButton component.
+*
+* @param children - The content to be rendered inside the button.
+*/
+const DraggableButton: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    return (
+        <div className="p-2 mb-2 bg-white rounded border inline-flex w-full items-center">
+            <span className="mr-2 w-full">{children}</span>
+            <span className={`transition bg-blue-400 hover:bg-blue-500 ml-auto text-white p-1 font-semibold text-xs rounded-sm`}>drag</span>
+        </div>
+    )
+}
+
+/**
+* SidebarTitle component displays a title with an optional icon.
+*
+* @param title - The title to be displayed.
+* @param icon - An optional icon to be displayed before the title.
+*/
+const SidebarTitle: React.FC<{ title: string, icon?: React.ReactNode }> = ({ title, icon }) => {
+    return (
+        <h3 className='text-white font-semibold mb-3 flex items-center'>
+        {icon && <span className="inline-block mr-2">{icon}</span>}
+        <span>{title}</span>
+        </h3>
+    )
+}
+
+const SidebarComponents: React.FC = () => {
+    return (
+        <Droppable
+            droppableId={dndId.stringify({ type: 'droppable', name: 'sidebar-components' })}
+            isDropDisabled={true}
+            type="component"
+            isCombineEnabled={false}>
+            {(provided) => (
+                <div ref={provided.innerRef} {...provided.droppableProps} className="w-[192px]">
+                    <Draggable
+                        draggableId={dndId.stringify({ type: 'draggable', name: 'sidebar-components' })}
+                        index={0}>
+                        {(provided) => (
+                            <div
+                                className="user-select-none w-full"
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}>
+                                <DraggableButton>
+                                    component
+                                </DraggableButton>
+                            </div>
+                        )}
+                    </Draggable>
+                    {provided.placeholder}
+                </div>
+            )}
+        </Droppable>
+    )
+}
 
 const SidebarGrids: React.FC<{grids: Grid[]}> = ({grids}) => {
     return (
@@ -79,18 +140,17 @@ const SidebarGrids: React.FC<{grids: Grid[]}> = ({grids}) => {
                             key={index}>
                             {(provided) => (
                                 <div
-                                    className="bg-gray-200 p-3 mb-5 w-48 rounded-lg user-select-none text-sm flex items-center"
+                                    className="w-48 rounded-lg user-select-none text-sm flex items-center"
                                     ref={provided.innerRef}
                                     {...provided.draggableProps}
                                     {...provided.dragHandleProps}>
-                                    <div className="inline-flex w-full items-center">
-                                        <FaGripVertical className="mr-2" />
+                                    <DraggableButton>
                                         {grid.columns.map((width, innerIndex) => (
                                             <span key={innerIndex} className={`${widthClassMap[width]} bg-gray-100 border border-gray-300 rounded-sm indent-1`}>
                                                 {width}
                                             </span>
                                         ))}
-                                    </div>
+                                    </DraggableButton>
                                 </div>
                             )}
                         </Draggable>)
@@ -154,11 +214,11 @@ const RowSectionContent: React.FC<Row> = ({ id, columns }) => {
                                 index={innerIndex}>
                                 {(provided) => (
                                     <div
-                                        className="bg-gray-200 p-3 mb-5 w-48 rounded-lg user-select-none"
+                                        className="bg-gray-200 p-3 mb-5 w-full rounded-lg user-select-none"
                                         ref={provided.innerRef}
                                         {...provided.draggableProps}
                                         {...provided.dragHandleProps}>
-                                        {component.type} {index}-{innerIndex}
+                                        {JSON.stringify(component)}
                                     </div>
                                 )}
                             </Draggable>
@@ -195,10 +255,8 @@ const EditorPage: React.FC = () => {
         const { destination, source } = result
         if (!destination) return
         if(source.droppableId === destination.droppableId && source.index === destination.index) return
-    
         const sourceDroppableId = dndId.parse(source.droppableId)
         const destinationDroppableId = dndId.parse(destination.droppableId)
-    
         // Adicionar uma nova linha a partir da sidebar
         if (sourceDroppableId.name === 'sidebar-grids' && destinationDroppableId.name === 'container') {
             const grid: Grid = grids[source.index]
@@ -230,17 +288,16 @@ const EditorPage: React.FC = () => {
             const destinationRowId = destinationDroppableId.rowId
             const sourceColumnId = sourceDroppableId.columnId
             const destinationColumnId = destinationDroppableId.columnId
-
-            if (sourceRowId === destinationRowId && sourceColumnId === destinationColumnId) {
-                const newRows = [...rows]
-                const row = newRows.find(row => row.id === sourceRowId)
-                if (!row) return
-                const column = row.columns.find(column => column.id === sourceColumnId)
-                if (!column) return
-                const [movedComponent] = column.components.splice(source.index, 1)
-                column.components.splice(destination.index, 0, movedComponent)
-                setRows(newRows)
-            }
+            const newRows = [...rows]
+            const sourceRow = newRows.find(row => row.id === sourceRowId)
+            const destinationRow = newRows.find(row => row.id === destinationRowId)
+            if (!sourceRow || !destinationRow) return
+            const sourceColumn = sourceRow.columns.find(column => column.id === sourceColumnId)
+            const destinationColumn = destinationRow.columns.find(column => column.id === destinationColumnId)
+            if (!sourceColumn || !destinationColumn) return
+            const [removed] = sourceColumn.components.splice(source.index, 1)
+            destinationColumn.components.splice(destination.index, 0, removed)
+            setRows(newRows)
         }
         console.log({ sourceDroppableId, destinationDroppableId, rows })
         console.log({ source, destination })
@@ -249,34 +306,17 @@ const EditorPage: React.FC = () => {
     return (
         <>
         <title>Page Wizard: Page Editor</title>
-        <div className="bg-white flex min-h-screen">
+        <div className="bg-white flex min-h-screen text-sm">
             <DragDropContext onDragEnd={handleDragEnd}>
                 <aside className="border-b w-full py-2 flex-1 bg-slate-900">
-                    <SidebarGrids grids={grids} />
-                    <Droppable
-                        droppableId={dndId.stringify({ type: 'droppable', name: 'sidebar-components' })}
-                        isDropDisabled={true}
-                        type="component"
-                        isCombineEnabled={false}>
-                        {(provided) => (
-                            <div ref={provided.innerRef} {...provided.droppableProps} className="w-[192px]">
-                                <Draggable
-                                    draggableId={dndId.stringify({ type: 'draggable', name: 'sidebar-components' })}
-                                    index={0}>
-                                    {(provided) => (
-                                        <div
-                                            className="bg-gray-200 p-3 mb-5 w-48 rounded-lg user-select-none"
-                                            ref={provided.innerRef}
-                                            {...provided.draggableProps}
-                                            {...provided.dragHandleProps}>
-                                            Component 1
-                                        </div>
-                                    )}
-                                </Draggable>
-                                {provided.placeholder}
-                            </div>
-                        )}
-                    </Droppable>
+                    <div className="px-2">
+                        <SidebarTitle title='Grid system' icon={<RiGridLine/>} />
+                        <SidebarGrids grids={grids} />
+                    </div>
+                    <div className="px-2 mt-4">
+                        <SidebarTitle title='Components' icon={<PiLego />} />
+                        <SidebarComponents />
+                    </div>
                 </aside>
                 <div className="w-full flex-grow-0 p-4 min-h-screen">
                     <Droppable
