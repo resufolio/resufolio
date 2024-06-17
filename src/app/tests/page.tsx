@@ -46,21 +46,25 @@ interface RowSectionProps extends Row {
     index: number;
 }
 
-// interface DnDId {
-//     name: string;
-//     value?: string;
-// }
+interface DnDId <T extends string> {
+    type: 'droppable' | 'draggable';
+    name: T;
+    index?: number;
+    rowId?: string;
+    columnId?: string;
+}
+type DnDIdType = 'container' | 'sidebar-grids' | 'sidebar-components' | 'row' | 'column' | 'component'
 
-// const dndId = {
-//     parse: (id: string) => JSON.parse(id) as DnDId[],
-//     stringify: (id: DnDId[]) => JSON.stringify(id),
-// }
+const dndId = {
+    parse: (id: string) => JSON.parse(id) as DnDId<DnDIdType>,
+    stringify: (id: DnDId<DnDIdType>) => JSON.stringify(id),
+}
 
 const SidebarGrids: React.FC<{grids: Grid[]}> = ({grids}) => {
     return (
         <>
             <Droppable
-                droppableId={`sidebar-grids-droppable`}
+                droppableId={dndId.stringify({ type: 'droppable', name: 'sidebar-grids' })}
                 isDropDisabled={true}
                 type="row"
                 isCombineEnabled={false}>
@@ -68,7 +72,7 @@ const SidebarGrids: React.FC<{grids: Grid[]}> = ({grids}) => {
                     <div ref={provided.innerRef} {...provided.droppableProps} className="w-[192px]">
                         {grids.map((grid, index) => (
                         <Draggable
-                            draggableId={`sidebar-grids-draggable-${index}`}
+                            draggableId={dndId.stringify({ type: 'draggable', name: 'sidebar-grids', index })}
                             index={index}
                             key={index}>
                             {(provided) => (
@@ -100,7 +104,7 @@ const SidebarGrids: React.FC<{grids: Grid[]}> = ({grids}) => {
 const RowSection: React.FC<RowSectionProps> = ({ id, columns, index }) => {
     return (
         <Droppable
-            droppableId={`droppable-row-${id}`}
+            droppableId={dndId.stringify({ type: 'droppable', name: 'row', rowId: id })}
             isCombineEnabled={false}>
             {(provided) => (
                 <div
@@ -109,7 +113,7 @@ const RowSection: React.FC<RowSectionProps> = ({ id, columns, index }) => {
                     {...provided.droppableProps}>
                     <p>{`droppable-row-${id}`}</p>
                     <Draggable
-                        draggableId={`draggable-row-${id}`}
+                        draggableId={dndId.stringify({ type: 'draggable', name: 'row', rowId: id })}
                         index={index}>
                         {(provided) => (
                             <section
@@ -134,7 +138,7 @@ const RowSectionContent: React.FC<Row> = ({ id, columns }) => {
         {columns.map((column, index) => (
             <Droppable
                 key={index}
-                droppableId={`column-${id}-${index}`}
+                droppableId={dndId.stringify({ type: 'droppable', name: 'column', rowId: id, columnId: column.id })}
                 type="component"
                 isCombineEnabled={false}>
                 {(provided) => (
@@ -145,7 +149,7 @@ const RowSectionContent: React.FC<Row> = ({ id, columns }) => {
                         {column.components.map((component, innerIndex) => (
                             <Draggable
                                 key={innerIndex}
-                                draggableId={`draggable-${id}-${index}-${innerIndex}`}
+                                draggableId={dndId.stringify({ type: 'draggable', name: 'component', rowId: id, columnId: column.id })}
                                 index={innerIndex}>
                                 {(provided) => (
                                     <div
@@ -171,7 +175,7 @@ const gridToRow = (grid: Grid, index: number): Row => {
     return {
         id: `${index}`,
         columns: grid.columns.map((width, innerIndex) => ({
-            id: `column-${innerIndex}`,
+            id: `${innerIndex}`,
             components: [],
             width,
         }))
@@ -190,25 +194,26 @@ const TestsPage = () => {
         const { destination, source } = result
         if (!destination) return
         if(source.droppableId === destination.droppableId) return
-        // Adding a new row to the container
-        if(source.droppableId === 'sidebar-grids-droppable' && destination.droppableId === 'container') {
+        const sourceDroppableId = dndId.parse(source.droppableId)
+        const destinationDroppableId = dndId.parse(destination.droppableId)
+
+        if(sourceDroppableId.name === 'sidebar-grids' && destinationDroppableId.name === 'container') {
             const grid: Grid = grids[source.index]
             const row: Row = gridToRow(grid, rows.length)
             setRows([...rows, row])
         }
         // Reordering rows inside the container
-        else if(source.droppableId.startsWith('droppable-row-') && destination.droppableId.startsWith('droppable-row-')) {
+        else if(sourceDroppableId.name === 'row' && destinationDroppableId.name === 'row') {
             const newRows = [...rows]
             const [removed] = newRows.splice(source.index, 1)
             newRows.splice(destination.index, 0, removed)
             setRows(newRows)
         }
         // Adding a new component to a column
-        else if(source.droppableId === 'sidebar-components-droppable' && destination.droppableId.startsWith('column-')) {
+        else if(sourceDroppableId.name === 'sidebar-components' && destinationDroppableId.name === 'column') {
             alert("Adding component to column")
-            const row = rows[parseInt(destination.droppableId.split('-')[1])]
         }
-        console.log({ destination, source })
+        console.log({ sourceDroppableId, destinationDroppableId })
     }
 
     return (
@@ -219,14 +224,14 @@ const TestsPage = () => {
                 <aside className="border-b w-full py-2 flex-1 bg-slate-900">
                     <SidebarGrids grids={grids} />
                     <Droppable
-                        droppableId="sidebar-components-droppable"
+                        droppableId={dndId.stringify({ type: 'droppable', name: 'sidebar-components' })}
                         isDropDisabled={true}
                         type="component"
                         isCombineEnabled={false}>
                         {(provided) => (
                             <div ref={provided.innerRef} {...provided.droppableProps} className="w-[192px]">
                                 <Draggable
-                                    draggableId="sidebar-components-draggable"
+                                    draggableId={dndId.stringify({ type: 'draggable', name: 'sidebar-components' })}
                                     index={0}>
                                     {(provided) => (
                                         <div
@@ -248,7 +253,7 @@ const TestsPage = () => {
                         {JSON.stringify(rows)}
                     </div>
                     <Droppable
-                        droppableId="container"
+                        droppableId={dndId.stringify({ type: 'droppable', name: 'container' })}
                         type="row"
                         isCombineEnabled={false}>
                         {(provided) => (
