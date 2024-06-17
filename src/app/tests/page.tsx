@@ -1,7 +1,7 @@
 "use client"
 import { DragDropContext, Draggable, Droppable, DropResult } from "@hello-pangea/dnd"
 import { useState } from "react"
-import { FaArrowsAlt, FaGripVertical, FaTrash } from "react-icons/fa"
+import { FaArrowsAlt, FaTrash } from "react-icons/fa"
 import { PiLego } from "react-icons/pi"
 import { RiGridLine } from "react-icons/ri"
 
@@ -64,6 +64,7 @@ const dndId = {
     parse: (id: string) => JSON.parse(id) as DnDId<DnDIdType>,
     stringify: (id: DnDId<DnDIdType>) => JSON.stringify(id),
 }
+
 /**
 * DraggableButton component.
 *
@@ -93,6 +94,10 @@ const SidebarTitle: React.FC<{ title: string, icon?: React.ReactNode }> = ({ tit
     )
 }
 
+/**
+ * SidebarComponents component.
+ * Renders the sidebar components.
+ */
 const SidebarComponents: React.FC = () => {
     return (
         <Droppable
@@ -124,6 +129,14 @@ const SidebarComponents: React.FC = () => {
     )
 }
 
+/**
+ * Renders a sidebar grid component.
+ *
+ * @component
+ * @param {Object} props - The component props.
+ * @param {Grid[]} props.grids - The array of grid objects.
+ * @returns {JSX.Element} The rendered SidebarGrids component.
+ */
 const SidebarGrids: React.FC<{grids: Grid[]}> = ({grids}) => {
     return (
         <>
@@ -164,6 +177,17 @@ const SidebarGrids: React.FC<{grids: Grid[]}> = ({grids}) => {
     )
 }
 
+/**
+ * Represents a row section component.
+ *
+ * @component
+ * @param {RowSectionProps} props - The props for the RowSection component.
+ * @param {string} props.id - The unique identifier for the row section.
+ * @param {number} props.columns - The number of columns in the row section.
+ * @param {number} props.index - The index of the row section.
+ * @param {Function} props.handleDeleteRow - The function to handle row deletion.
+ * @returns {JSX.Element} The rendered RowSection component.
+ */
 const RowSection: React.FC<RowSectionProps> = ({ id, columns, index, handleDeleteRow }) => {
     return (
         <Droppable
@@ -211,6 +235,13 @@ const RowSection: React.FC<RowSectionProps> = ({ id, columns, index, handleDelet
     )
 }
 
+/**
+ * Renders the content of a row section.
+ *
+ * @component
+ * @param {Row} props - The props containing the row ID and columns.
+ * @returns {JSX.Element} The rendered row section content.
+ */
 const RowSectionContent: React.FC<Row> = ({ id, columns }) => {
     return (
         <section className="inline-flex w-full">
@@ -253,6 +284,12 @@ const RowSectionContent: React.FC<Row> = ({ id, columns }) => {
     )
 }
 
+/**
+ * Converts a grid object to a row object.
+ * @param grid - The grid object to convert.
+ * @param index - The index of the row.
+ * @returns The converted row object.
+ */
 const gridToRow = (grid: Grid, index: number): Row => {
     return {
         id: `${index}`,
@@ -264,6 +301,10 @@ const gridToRow = (grid: Grid, index: number): Row => {
     }
 }
 
+/**
+ * EditorPage component represents the page editor for creating and editing pages.
+ * It allows users to add and arrange rows and components within a grid-based layout.
+ */
 const EditorPage: React.FC = () => {
     const [rows, setRows] = useState<Row[]>([])
     const grids: Grid[] = [
