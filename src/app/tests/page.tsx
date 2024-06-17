@@ -46,14 +46,31 @@ interface RowSectionProps extends Row {
     index: number;
 }
 
+// interface DnDId {
+//     name: string;
+//     value?: string;
+// }
+
+// const dndId = {
+//     parse: (id: string) => JSON.parse(id) as DnDId[],
+//     stringify: (id: DnDId[]) => JSON.stringify(id),
+// }
+
 const SidebarGrids: React.FC<{grids: Grid[]}> = ({grids}) => {
     return (
         <>
-            <Droppable droppableId={`sidebar-grids-droppable`} isDropDisabled={true} type="row" isCombineEnabled={false}>
+            <Droppable
+                droppableId={`sidebar-grids-droppable`}
+                isDropDisabled={true}
+                type="row"
+                isCombineEnabled={false}>
                 {(provided) => (
                     <div ref={provided.innerRef} {...provided.droppableProps} className="w-[192px]">
                         {grids.map((grid, index) => (
-                        <Draggable draggableId={`sidebar-grids-draggable-${index}`} index={index} key={index}>
+                        <Draggable
+                            draggableId={`sidebar-grids-draggable-${index}`}
+                            index={index}
+                            key={index}>
                             {(provided) => (
                                 <div
                                     className="bg-gray-200 p-3 mb-5 w-48 rounded-lg user-select-none text-sm flex items-center"
@@ -82,13 +99,18 @@ const SidebarGrids: React.FC<{grids: Grid[]}> = ({grids}) => {
 
 const RowSection: React.FC<RowSectionProps> = ({ id, columns, index }) => {
     return (
-        <Droppable droppableId={`droppable-row-${id}`} isCombineEnabled={false}>
+        <Droppable
+            droppableId={`droppable-row-${id}`}
+            isCombineEnabled={false}>
             {(provided) => (
                 <div
                     className="border border-slate-300 w-full"
                     ref={provided.innerRef}
                     {...provided.droppableProps}>
-                    <Draggable draggableId={`draggable-row-${id}`} index={index}>
+                    <p>{`droppable-row-${id}`}</p>
+                    <Draggable
+                        draggableId={`draggable-row-${id}`}
+                        index={index}>
                         {(provided) => (
                             <section
                                 className="border border-slate-300 w-full"
@@ -110,14 +132,21 @@ const RowSectionContent: React.FC<Row> = ({ id, columns }) => {
     return (
         <section className="inline-flex border border-slate-300 w-full">
         {columns.map((column, index) => (
-            <Droppable key={index} droppableId={`column-${id}-${index}`} type="component" isCombineEnabled={false}>
+            <Droppable
+                key={index}
+                droppableId={`column-${id}-${index}`}
+                type="component"
+                isCombineEnabled={false}>
                 {(provided) => (
                     <div
                         className={`border p-3 mb-5 rounded-lg user-select-none ${widthClassMap[column.width]}`}
                         ref={provided.innerRef}
                         {...provided.droppableProps}>
                         {column.components.map((component, innerIndex) => (
-                            <Draggable key={innerIndex} draggableId={`draggable-${id}-${index}-${innerIndex}`} index={innerIndex}>
+                            <Draggable
+                                key={innerIndex}
+                                draggableId={`draggable-${id}-${index}-${innerIndex}`}
+                                index={innerIndex}>
                                 {(provided) => (
                                     <div
                                         className="bg-gray-200 p-3 mb-5 w-48 rounded-lg user-select-none"
@@ -177,19 +206,28 @@ const TestsPage = () => {
         // Adding a new component to a column
         else if(source.droppableId === 'sidebar-components-droppable' && destination.droppableId.startsWith('column-')) {
             alert("Adding component to column")
+            const row = rows[parseInt(destination.droppableId.split('-')[1])]
         }
         console.log({ destination, source })
     }
 
     return (
+        <>
+        <title>Page Wizard: Page Editor</title>
         <div className="bg-white flex min-h-screen">
             <DragDropContext onDragEnd={handleDragEnd}>
                 <aside className="border-b w-full py-2 flex-1 bg-slate-900">
                     <SidebarGrids grids={grids} />
-                    <Droppable droppableId="sidebar-components-droppable" isDropDisabled={true} type="component" isCombineEnabled={false}>
+                    <Droppable
+                        droppableId="sidebar-components-droppable"
+                        isDropDisabled={true}
+                        type="component"
+                        isCombineEnabled={false}>
                         {(provided) => (
                             <div ref={provided.innerRef} {...provided.droppableProps} className="w-[192px]">
-                                <Draggable draggableId="sidebar-components-draggable" index={0}>
+                                <Draggable
+                                    draggableId="sidebar-components-draggable"
+                                    index={0}>
                                     {(provided) => (
                                         <div
                                             className="bg-gray-200 p-3 mb-5 w-48 rounded-lg user-select-none"
@@ -206,7 +244,13 @@ const TestsPage = () => {
                     </Droppable>
                 </aside>
                 <div className="w-full flex-grow-0 p-4 min-h-screen">
-                    <Droppable droppableId="container" type="row" isCombineEnabled={false}>
+                    <div>
+                        {JSON.stringify(rows)}
+                    </div>
+                    <Droppable
+                        droppableId="container"
+                        type="row"
+                        isCombineEnabled={false}>
                         {(provided) => (
                             <div
                                 className="border border-slate-300 w-full min-h-screen"
@@ -223,6 +267,7 @@ const TestsPage = () => {
                 </div>
             </DragDropContext>
         </div>
+    </>
     )
 }
 
