@@ -180,7 +180,7 @@ const EditorPage: React.FC = () => {
         <title>Page Editor</title>
         <DragDropContext onDragEnd={handleDragEnd}>
         <div className="flex min-h-screen">
-        <aside className="w-48 min-w-48 bg-gray-800 text-gray-800 sticky top-0 max-h-screen overflow-y-auto">
+        <aside className="w-48 min-w-48 bg-gray-800 text-gray-800 sticky top-0 max-h-screen overflow-y-auto z-10">
         <ul className='flex text-white text-[11px] py-3 leading-3 border-b border-gray-600 mb-3'>
         {sidebarTabs.map(tab => (
             <li
