@@ -37,10 +37,9 @@ interface Row {
     columns: Column[];
 }
 
-// interface Grid {
-//     columns: number[];
-// }
-
+interface Grid {
+    columns: number[];
+}
 
 interface RowSectionProps extends Row {
     index: number;
@@ -159,6 +158,13 @@ const TestsPage = () => {
         },
     ])
 
+    const grids: Grid[] = [
+        { columns: [6, 6] },
+        { columns: [4, 4, 4] },
+        { columns: [8, 4] },
+        { columns: [12] }
+    ]
+
     const handleDragEnd = (result: DropResult) => {
         const { destination } = result
         if (!destination) return
@@ -170,10 +176,28 @@ const TestsPage = () => {
         <div className="bg-white p-3 flex">
             <DragDropContext onDragEnd={handleDragEnd}>
                 <aside className="border-b w-full py-2 flex-1">
-                    <Droppable droppableId="droppable" isDropDisabled={true} type="component">
+                <Droppable droppableId="sidebar-grids-droppable" isDropDisabled={true} type="row">
                         {(provided) => (
                             <div ref={provided.innerRef} {...provided.droppableProps} className="w-[192px]">
-                                <Draggable draggableId="draggable-1" index={0}>
+                                <Draggable draggableId="sidebar-grids-draggable" index={0}>
+                                    {(provided) => (
+                                        <div
+                                            className="bg-gray-200 p-3 mb-5 w-48 rounded-lg user-select-none"
+                                            ref={provided.innerRef}
+                                            {...provided.draggableProps}
+                                            {...provided.dragHandleProps}>
+                                            Grid
+                                        </div>
+                                    )}
+                                </Draggable>
+                                {provided.placeholder}
+                            </div>
+                        )}
+                    </Droppable>
+                    <Droppable droppableId="sidebar-components-droppable" isDropDisabled={true} type="component">
+                        {(provided) => (
+                            <div ref={provided.innerRef} {...provided.droppableProps} className="w-[192px]">
+                                <Draggable draggableId="sidebar-components-draggable" index={0}>
                                     {(provided) => (
                                         <div
                                             className="bg-gray-200 p-3 mb-5 w-48 rounded-lg user-select-none"
@@ -190,9 +214,20 @@ const TestsPage = () => {
                     </Droppable>
                 </aside>
                 <div className="w-full flex-grow-0 p-4">
-                    {rows.map((row, index) => (
-                        <RowSection key={row.id} index={index} {...row} />
-                    ))}
+                    <Droppable droppableId="droppable" type="row">
+                        {(provided) => (
+                            <div
+                                className="border border-slate-300 w-full"
+                                ref={provided.innerRef}
+                                {...provided.droppableProps}>
+                                    {rows.map((row, index) => (
+                                        <RowSection key={row.id} index={index} {...row} />
+                                    ))}
+                                {provided.placeholder}
+                            </div>
+                        )}
+                    </Droppable>
+
                 </div>
             </DragDropContext>
         </div>
