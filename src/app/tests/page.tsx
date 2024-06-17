@@ -306,9 +306,9 @@ const EditorPage: React.FC = () => {
     return (
         <>
         <title>Page Wizard: Page Editor</title>
-        <div className="bg-white flex min-h-screen text-sm">
+        <div className="bg-slate-900 flex min-h-screen text-sm">
             <DragDropContext onDragEnd={handleDragEnd}>
-                <aside className="border-b w-full py-2 flex-1 bg-slate-900">
+                <aside className="border-b w-[210px] py-2 bg-slate-900">
                     <div className="px-2">
                         <SidebarTitle title='Grid system' icon={<RiGridLine/>} />
                         <SidebarGrids grids={grids} />
@@ -318,7 +318,12 @@ const EditorPage: React.FC = () => {
                         <SidebarComponents />
                     </div>
                 </aside>
-                <div className="w-full flex-grow-0 p-4 min-h-screen">
+                <div
+                    className={`flex-1 px-3 pt-10 bg-white min-h-full border rounded-sm border-gray-300 m-2 relative
+                    before:content-['Container'] before:absolute before:left-0 before:top-0 before:bg-gray-100 before:text-xs
+                    before:font-semibold before:px-2 before:py-1 before:text-gray-500
+                    before:rounded-br before:border-r before:border-b before:border-gray-300
+                    `}>
                     <Droppable
                         droppableId={dndId.stringify({ type: 'droppable', name: 'container' })}
                         type="row"
