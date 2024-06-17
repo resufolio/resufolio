@@ -1,6 +1,7 @@
 "use client"
 import { DragDropContext, Draggable, Droppable, DropResult } from "@hello-pangea/dnd"
 import { useState } from "react"
+import { FaGripVertical } from "react-icons/fa"
 
 /**
 * Mapping of numbers to tailwind classes representing width values.
@@ -45,13 +46,7 @@ interface RowSectionProps extends Row {
     index: number;
 }
 
-const SidebarGrids: React.FC = () => {
-    const grids: Grid[] = [
-        { columns: [6, 6] },
-        { columns: [4, 4, 4] },
-        { columns: [8, 4] },
-        { columns: [12] }
-    ]
+const SidebarGrids: React.FC<{grids: Grid[]}> = ({grids}) => {
     return (
         <>
             <Droppable droppableId={`sidebar-grids-droppable`} isDropDisabled={true} type="row">
@@ -61,11 +56,18 @@ const SidebarGrids: React.FC = () => {
                         <Draggable draggableId={`sidebar-grids-draggable-${index}`} index={index} key={index}>
                             {(provided) => (
                                 <div
-                                    className="bg-gray-200 p-3 mb-5 w-48 rounded-lg user-select-none"
+                                    className="bg-gray-200 p-3 mb-5 w-48 rounded-lg user-select-none text-sm flex items-center"
                                     ref={provided.innerRef}
                                     {...provided.draggableProps}
                                     {...provided.dragHandleProps}>
-                                    {grid.columns.join(" ")}
+                                    <div className="inline-flex w-full items-center">
+                                        <FaGripVertical className="mr-2" />
+                                        {grid.columns.map((width, innerIndex) => (
+                                            <span key={innerIndex} className={`${widthClassMap[width]} bg-gray-100 border border-gray-300 rounded-sm indent-1`}>
+                                                {width}
+                                            </span>
+                                        ))}
+                                    </div>
                                 </div>
                             )}
                         </Draggable>)
@@ -136,71 +138,50 @@ const RowSectionContent: React.FC<Row> = ({ id, columns }) => {
     )
 }
 
-const TestsPage = () => {
-    const [rows, setRows] = useState<Row[]>([
-        {
-            id: "row-1",
-            columns: [
-                {
-                    id: "column-1",
-                    width: 4,
-                    components: [
-                        { id: "component-1", type: "text", props: {} },
-                        { id: "component-2", type: "image", props: {} },
-                    ],
-                },
-                {
-                    id: "column-2",
-                    width: 8,
-                    components: [
-                        { id: "component-3", type: "text", props: {} },
-                        { id: "component-4", type: "image", props: {} },
-                        { id: "component-9", type: "text", props: {} }
-                    ],
-                },
-            ],
-        },
-        {
-            id: "row-2",
-            columns: [
-                {
-                    id: "column-3",
-                    width: 4,
-                    components: [
-                        { id: "component-5", type: "text", props: {} },
-                        { id: "component-6", type: "image", props: {} },
-                    ],
-                },
-                {
-                    id: "column-4",
-                    width: 4,
-                    components: [
-                        { id: "component-7", type: "text", props: {} },
-                        { id: "component-8", type: "image", props: {} },
-                    ],
-                },
-                {
-                    id: "column-5",
-                    width: 4,
-                    components: [
-                        { id: "component-10", type: "text", props: {} }
-                    ],
-                }
-            ],
-        },
-    ])
+const gridToRow = (grid: Grid, index: number): Row => {
+    return {
+        id: `${index}`,
+        columns: grid.columns.map((width, innerIndex) => ({
+            id: `column-${innerIndex}`,
+            components: [],
+            width,
+        }))
+    }
+}
 
+const TestsPage = () => {
+    const [rows, setRows] = useState<Row[]>([])
+    const grids: Grid[] = [
+        { columns: [6, 6] },
+        { columns: [4, 4, 4] },
+        { columns: [8, 4] },
+        { columns: [12] }
+    ]
     const handleDragEnd = (result: DropResult) => {
-        const { destination } = result
+        const { destination, source } = result
         if (!destination) return
-        console.log({ result, destination })
+        if(source.droppableId === destination.droppableId) return
+        // Adding a new row to the container
+        if(source.droppableId === 'sidebar-grids-droppable' && destination.droppableId === 'container') {
+            const grid: Grid = grids[source.index]
+            const row: Row = gridToRow(grid, rows.length)
+            setRows([...rows, row])
+        }
+        // Reordering rows
+        else if(source.droppableId === 'container' && destination.droppableId === 'container') {
+            const newRows = [...rows]
+            const [removed] = newRows.splice(source.index, 1)
+            newRows.splice(destination.index, 0, removed)
+            setRows(newRows)
+        }
+        console.log({ result, destination, source })
     }
 
     return (
-        <div className="bg-white p-3 flex min-h-screen">
+        <div className="bg-white flex min-h-screen">
             <DragDropContext onDragEnd={handleDragEnd}>
-                <aside className="border-b w-full py-2 flex-1">
-                    <SidebarGrids />
+                <aside className="border-b w-full py-2 flex-1 bg-slate-900">
+                    <SidebarGrids grids={grids} />
                     <Droppable droppableId="sidebar-components-droppable" isDropDisabled={true} type="component">
                         {(provided) => (
                             <div ref={provided.innerRef} {...provided.droppableProps} className="w-[192px]">
@@ -221,10 +202,10 @@ const TestsPage = () => {
                     </Droppable>
                 </aside>
                 <div className="w-full flex-grow-0 p-4 min-h-screen">
-                    <Droppable droppableId="droppable" type="row">
+                    <Droppable droppableId="container" type="row">
                         {(provided) => (
                             <div
-                                className="border border-slate-300 w-full"
+                                className="border border-slate-300 w-full min-h-screen"
                                 ref={provided.innerRef}
                                 {...provided.droppableProps}>
                                     {rows.map((row, index) => (
