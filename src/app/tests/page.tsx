@@ -1,7 +1,7 @@
 "use client"
 import { DragDropContext, Draggable, Droppable, DropResult } from "@hello-pangea/dnd"
 import { useState } from "react"
-import { FaGripVertical } from "react-icons/fa"
+import { FaArrowsAlt, FaGripVertical, FaTrash } from "react-icons/fa"
 import { PiLego } from "react-icons/pi"
 import { RiGridLine } from "react-icons/ri"
 
@@ -46,6 +46,7 @@ interface Grid {
 
 interface RowSectionProps extends Row {
     index: number;
+    handleDeleteRow: (id: string) => void;
 }
 
 interface DnDId <T extends string> {
@@ -163,7 +164,7 @@ const SidebarGrids: React.FC<{grids: Grid[]}> = ({grids}) => {
     )
 }
 
-const RowSection: React.FC<RowSectionProps> = ({ id, columns, index }) => {
+const RowSection: React.FC<RowSectionProps> = ({ id, columns, index, handleDeleteRow }) => {
     return (
         <Droppable
             droppableId={dndId.stringify({ type: 'droppable', name: 'row', rowId: id })}
@@ -185,7 +186,21 @@ const RowSection: React.FC<RowSectionProps> = ({ id, columns, index }) => {
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
                                 {...provided.dragHandleProps}>
-                                <RowSectionContent id={id} columns={columns} />
+                                <div className='ml-auto absolute top-2 right-2 text-xs'>
+                                    <div className="p-1 bg-sky-400 inline-flex items-center transition rounded text-white hover:bg-blue-500 hover:opacity-100 active:bg-blue-500 active:opacity-100 opacity-30 cursor-grab mr-2" {...provided.dragHandleProps}>
+                                        <FaArrowsAlt />
+                                        <span className='ml-1'>Drag</span>
+                                    </div>
+                                    <button
+                                        onClick={() => handleDeleteRow(id)}
+                                        className="bg-red-400 inline-flex items-center hover:bg-red-500 opacity-30 hover:opacity-100 text-white rounded p-1 cursor-pointer">
+                                        <FaTrash/>
+                                        <span className='ml-1'>Delete</span>
+                                    </button>
+                                </div>
+                                <div>
+                                    <RowSectionContent id={id} columns={columns} />
+                                </div>
                             </section>
                         )}
                     </Draggable>
@@ -257,6 +272,11 @@ const EditorPage: React.FC = () => {
         { columns: [8, 4] },
         { columns: [12] }
     ]
+
+    const handleDeleteRow = (id: string) => {
+        setRows(rows.filter(row => row.id !== id))
+    }
+
     const handleDragEnd = (result: DropResult) => {
         const { destination, source } = result
         if (!destination) return
@@ -340,7 +360,12 @@ const EditorPage: React.FC = () => {
                                 ref={provided.innerRef}
                                 {...provided.droppableProps}>
                                     {rows.map((row, index) => (
-                                        <RowSection key={row.id} index={index} {...row} />
+                                        <RowSection
+                                            key={row.id}
+                                            index={index}
+                                            {...row}
+                                            handleDeleteRow={handleDeleteRow}
+                                        />
                                     ))}
                                 {provided.placeholder}
                             </div>
