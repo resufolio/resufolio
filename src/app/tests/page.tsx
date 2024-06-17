@@ -18,11 +18,46 @@ interface Row {
     columns: Column[];
 }
 
-const RowSection: React.FC<Row> = ({ id, columns }) => {
+// interface Grid {
+//     columns: number[];
+// }
+
+
+interface RowSectionProps extends Row {
+    index: number;
+}
+
+const RowSection: React.FC<RowSectionProps> = ({ id, columns, index }) => {
+    return (
+        <Droppable droppableId={`droppable-row-${id}`}>
+            {(provided) => (
+                <div
+                    className="border border-slate-300 w-full"
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}>
+                    <Draggable draggableId={`draggable-row-${id}`} index={index}>
+                        {(provided) => (
+                            <section
+                                className="border border-slate-300 w-full"
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}>
+                                <RowSectionContent id={id} columns={columns} />
+                            </section>
+                        )}
+                    </Draggable>
+                    {provided.placeholder}
+                </div>
+            )}
+        </Droppable>
+    )
+}
+
+const RowSectionContent: React.FC<Row> = ({ id, columns }) => {
     return (
         <section className="inline-flex border border-slate-300 w-full">
         {columns.map((column, index) => (
-            <Droppable key={index} droppableId={`droppable-${id}-${index}`}>
+            <Droppable key={index} droppableId={`droppable-${id}-${index}`} type="component">
                 {(provided) => (
                     <div
                         className="border p-3 mb-5 rounded-lg user-select-none w-3/12"
@@ -111,7 +146,7 @@ const TestsPage = () => {
         <div className="bg-white p-3 flex">
             <DragDropContext onDragEnd={handleDragEnd}>
                 <aside className="border-b w-full py-2 flex-1">
-                    <Droppable droppableId="droppable" isDropDisabled={true}>
+                    <Droppable droppableId="droppable" isDropDisabled={true} type="component">
                         {(provided) => (
                             <div ref={provided.innerRef} {...provided.droppableProps} className="w-[192px]">
                                 <Draggable draggableId="draggable-1" index={0}>
@@ -121,7 +156,7 @@ const TestsPage = () => {
                                             ref={provided.innerRef}
                                             {...provided.draggableProps}
                                             {...provided.dragHandleProps}>
-                                            Draggable 1
+                                            Component 1
                                         </div>
                                     )}
                                 </Draggable>
@@ -131,8 +166,8 @@ const TestsPage = () => {
                     </Droppable>
                 </aside>
                 <div className="w-full flex-grow-0 p-4">
-                    {rows.map((row) => (
-                        <RowSection key={row.id} {...row} />
+                    {rows.map((row, index) => (
+                        <RowSection key={row.id} index={index} {...row} />
                     ))}
                 </div>
             </DragDropContext>
