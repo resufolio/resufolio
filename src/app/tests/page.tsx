@@ -170,7 +170,7 @@ const RowSection: React.FC<RowSectionProps> = ({ id, columns, index }) => {
             isCombineEnabled={false}>
             {(provided) => (
                 <div
-                    className="border border-slate-300 w-full"
+                    className="w-full"
                     ref={provided.innerRef}
                     {...provided.droppableProps}>
                     <Draggable
@@ -178,7 +178,10 @@ const RowSection: React.FC<RowSectionProps> = ({ id, columns, index }) => {
                         index={index}>
                         {(provided) => (
                             <section
-                                className="border border-slate-300 w-full"
+                                className={`relative p-2 overflow-hidden mb-1 rounded border pt-12 bg-gray-100 border-gray-300 shadow-inner
+                                before:absolute before:left-0 before:top-0 before:bg-gray-50 before:text-xs
+                                before:content-["Row"] before:font-semibold before:px-2 before:py-1 before:text-gray-500
+                                before:rounded-br before:border-b before:border-r before:border-gray-300`}
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
                                 {...provided.dragHandleProps}>
@@ -330,7 +333,7 @@ const EditorPage: React.FC = () => {
                         isCombineEnabled={false}>
                         {(provided) => (
                             <div
-                                className="border border-slate-300 w-full min-h-screen"
+                                className="w-full min-h-screen"
                                 ref={provided.innerRef}
                                 {...provided.droppableProps}>
                                     {rows.map((row, index) => (
