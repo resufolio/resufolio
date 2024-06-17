@@ -110,7 +110,7 @@ const RowSectionContent: React.FC<Row> = ({ id, columns }) => {
     return (
         <section className="inline-flex border border-slate-300 w-full">
         {columns.map((column, index) => (
-            <Droppable key={index} droppableId={`droppable-${id}-${index}`} type="component" isCombineEnabled={false}>
+            <Droppable key={index} droppableId={`column-${id}-${index}`} type="component" isCombineEnabled={false}>
                 {(provided) => (
                     <div
                         className={`border p-3 mb-5 rounded-lg user-select-none ${widthClassMap[column.width]}`}
@@ -173,6 +173,10 @@ const TestsPage = () => {
             const [removed] = newRows.splice(source.index, 1)
             newRows.splice(destination.index, 0, removed)
             setRows(newRows)
+        }
+        // Adding a new component to a column
+        else if(source.droppableId === 'sidebar-components-droppable' && destination.droppableId.startsWith('column-')) {
+            alert("Adding component to column")
         }
         console.log({ destination, source })
     }
