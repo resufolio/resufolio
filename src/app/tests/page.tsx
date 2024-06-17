@@ -2,6 +2,24 @@
 import { DragDropContext, Draggable, Droppable, DropResult } from "@hello-pangea/dnd"
 import { useState } from "react"
 
+/**
+* Mapping of numbers to tailwind classes representing width values.
+*/
+const widthClassMap: Record<number, string> = {
+    1: 'w-full md:w-1/12',
+    2: 'w-full md:w-2/12',
+    3: 'w-full md:w-3/12',
+    4: 'w-full md:w-4/12',
+    5: 'w-full md:w-5/12',
+    6: 'w-full md:w-6/12',
+    7: 'w-full md:w-7/12',
+    8: 'w-full md:w-8/12',
+    9: 'w-full md:w-9/12',
+    10: 'w-full md:w-10/12',
+    11: 'w-full md:w-11/12',
+    12: 'w-full',
+}
+
 interface Component {
     id: string;
     type: string;
@@ -11,6 +29,7 @@ interface Component {
 interface Column {
     id: string;
     components: Component[];
+    width: number;
 }
 
 interface Row {
@@ -60,7 +79,7 @@ const RowSectionContent: React.FC<Row> = ({ id, columns }) => {
             <Droppable key={index} droppableId={`droppable-${id}-${index}`} type="component">
                 {(provided) => (
                     <div
-                        className="border p-3 mb-5 rounded-lg user-select-none w-3/12"
+                        className={`border p-3 mb-5 rounded-lg user-select-none ${widthClassMap[column.width]}`}
                         ref={provided.innerRef}
                         {...provided.droppableProps}>
                         {column.components.map((component, innerIndex) => (
@@ -93,6 +112,7 @@ const TestsPage = () => {
             columns: [
                 {
                     id: "column-1",
+                    width: 4,
                     components: [
                         { id: "component-1", type: "text", props: {} },
                         { id: "component-2", type: "image", props: {} },
@@ -100,6 +120,7 @@ const TestsPage = () => {
                 },
                 {
                     id: "column-2",
+                    width: 8,
                     components: [
                         { id: "component-3", type: "text", props: {} },
                         { id: "component-4", type: "image", props: {} },
@@ -113,6 +134,7 @@ const TestsPage = () => {
             columns: [
                 {
                     id: "column-3",
+                    width: 4,
                     components: [
                         { id: "component-5", type: "text", props: {} },
                         { id: "component-6", type: "image", props: {} },
@@ -120,6 +142,7 @@ const TestsPage = () => {
                 },
                 {
                     id: "column-4",
+                    width: 4,
                     components: [
                         { id: "component-7", type: "text", props: {} },
                         { id: "component-8", type: "image", props: {} },
@@ -127,6 +150,7 @@ const TestsPage = () => {
                 },
                 {
                     id: "column-5",
+                    width: 4,
                     components: [
                         { id: "component-10", type: "text", props: {} }
                     ],
