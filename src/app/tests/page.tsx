@@ -2,17 +2,33 @@
 import { DragDropContext, Draggable, Droppable, DropResult } from "@hello-pangea/dnd"
 import { useState } from "react"
 
-const RowSection: React.FC<{id: number}> = ({id}) => {
+interface Component {
+    id: string;
+    type: string;
+    props: Record<string, any>;
+}
+
+interface Column {
+    id: string;
+    components: Component[];
+}
+
+interface Row {
+    id: string;
+    columns: Column[];
+}
+
+const RowSection: React.FC<Row> = ({ id, columns }) => {
     return (
         <section className="inline-flex border border-slate-300 w-full">
-        {Array.from({ length: 4 }).map((_, index) => (
+        {columns.map((column, index) => (
             <Droppable key={index} droppableId={`droppable-${id}-${index}`}>
                 {(provided) => (
                     <div
                         className="border p-3 mb-5 rounded-lg user-select-none w-3/12"
                         ref={provided.innerRef}
                         {...provided.droppableProps}>
-                        {Array.from({ length: 3 }).map((_, innerIndex) => (
+                        {column.components.map((component, innerIndex) => (
                             <Draggable key={innerIndex} draggableId={`draggable-${id}-${index}-${innerIndex}`} index={innerIndex}>
                                 {(provided) => (
                                     <div
@@ -20,7 +36,7 @@ const RowSection: React.FC<{id: number}> = ({id}) => {
                                         ref={provided.innerRef}
                                         {...provided.draggableProps}
                                         {...provided.dragHandleProps}>
-                                        Component {index}-{innerIndex}
+                                        {component.type} {index}-{innerIndex}
                                     </div>
                                 )}
                             </Draggable>
@@ -36,6 +52,54 @@ const RowSection: React.FC<{id: number}> = ({id}) => {
 
 const TestsPage = () => {
     const [result, setResult] = useState<DropResult | null>(null)
+    const [rows, setRows] = useState<Row[]>([
+        {
+            id: "row-1",
+            columns: [
+                {
+                    id: "column-1",
+                    components: [
+                        { id: "component-1", type: "text", props: {} },
+                        { id: "component-2", type: "image", props: {} },
+                    ],
+                },
+                {
+                    id: "column-2",
+                    components: [
+                        { id: "component-3", type: "text", props: {} },
+                        { id: "component-4", type: "image", props: {} },
+                        { id: "component-9", type: "text", props: {} }
+                    ],
+                },
+            ],
+        },
+        {
+            id: "row-2",
+            columns: [
+                {
+                    id: "column-3",
+                    components: [
+                        { id: "component-5", type: "text", props: {} },
+                        { id: "component-6", type: "image", props: {} },
+                    ],
+                },
+                {
+                    id: "column-4",
+                    components: [
+                        { id: "component-7", type: "text", props: {} },
+                        { id: "component-8", type: "image", props: {} },
+                    ],
+                },
+                {
+                    id: "column-5",
+                    components: [
+                        { id: "component-10", type: "text", props: {} }
+                    ],
+                }
+            ],
+        },
+    ])
+
     const handleDragEnd = (result: DropResult) => {
         const { destination } = result
         if (!destination) return
@@ -67,8 +131,8 @@ const TestsPage = () => {
                     </Droppable>
                 </aside>
                 <div className="w-full flex-grow-0 p-4">
-                    {Array.from({ length: 3 }).map((_, index) => (
-                        <RowSection key={index} id={index} />
+                    {rows.map((row) => (
+                        <RowSection key={row.id} {...row} />
                     ))}
                 </div>
             </DragDropContext>
