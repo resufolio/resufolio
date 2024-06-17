@@ -113,7 +113,6 @@ const RowSection: React.FC<RowSectionProps> = ({ id, columns, index }) => {
                     className="border border-slate-300 w-full"
                     ref={provided.innerRef}
                     {...provided.droppableProps}>
-                    <p>{`droppable-row-${id}`}</p>
                     <Draggable
                         draggableId={dndId.stringify({ type: 'draggable', name: 'row', rowId: id })}
                         index={index}>
@@ -140,7 +139,7 @@ const RowSectionContent: React.FC<Row> = ({ id, columns }) => {
         {columns.map((column, index) => (
             <Droppable
                 key={index}
-                droppableId={dndId.stringify({ type: 'droppable', name: 'column', rowId: id, columnId: column.id })}
+                droppableId={dndId.stringify({ type: 'droppable', name: 'column', rowId: id, columnId: column.id, index })}
                 type="component"
                 isCombineEnabled={false}>
                 {(provided) => (
@@ -184,7 +183,7 @@ const gridToRow = (grid: Grid, index: number): Row => {
     }
 }
 
-const TestsPage = () => {
+const EditorPage: React.FC = () => {
     const [rows, setRows] = useState<Row[]>([])
     const grids: Grid[] = [
         { columns: [6, 6] },
@@ -195,35 +194,56 @@ const TestsPage = () => {
     const handleDragEnd = (result: DropResult) => {
         const { destination, source } = result
         if (!destination) return
-        if(source.droppableId === destination.droppableId) return
+        if(source.droppableId === destination.droppableId && source.index === destination.index) return
+    
         const sourceDroppableId = dndId.parse(source.droppableId)
         const destinationDroppableId = dndId.parse(destination.droppableId)
-
-        if(sourceDroppableId.name === 'sidebar-grids' && destinationDroppableId.name === 'container') {
+    
+        // Adicionar uma nova linha a partir da sidebar
+        if (sourceDroppableId.name === 'sidebar-grids' && destinationDroppableId.name === 'container') {
             const grid: Grid = grids[source.index]
             const row: Row = gridToRow(grid, rows.length)
             setRows([...rows, row])
         }
-        // Reordering rows inside the container
-        else if(sourceDroppableId.name === 'row' && destinationDroppableId.name === 'row') {
+        // Reordenar linhas dentro do container
+        else if (sourceDroppableId.name === 'row' && destinationDroppableId.name === 'row') {
             const newRows = [...rows]
             const [removed] = newRows.splice(source.index, 1)
             newRows.splice(destination.index, 0, removed)
             setRows(newRows)
         }
-        // Adding a new component to a column
-        else if(sourceDroppableId.name === 'sidebar-components' && destinationDroppableId.name === 'column') {
+        // Adicionar um novo componente a uma coluna
+        else if (sourceDroppableId.name === 'sidebar-components' && destinationDroppableId.name === 'column') {
             const columnId = destinationDroppableId.columnId
             const rowId = destinationDroppableId.rowId
             const newRows = [...rows]
             const row = newRows.find(row => row.id === rowId)
-            if(!row) return
+            if (!row) return
             const column = row.columns.find(column => column.id === columnId)
-            if(!column) return
-            column.components.push({ id: Date.now().toString(), type: 'Component', props: {} })
+            if (!column) return
+            column.components.push({ id: String(column.components.length + 1), type: 'Component', props: {} })
             setRows(newRows)
         }
-        console.log({ sourceDroppableId, destinationDroppableId })
+        // Reordenar componentes dentro de uma coluna
+        else if (sourceDroppableId.name === 'column' && destinationDroppableId.name === 'column') {
+            const sourceRowId = sourceDroppableId.rowId
+            const destinationRowId = destinationDroppableId.rowId
+            const sourceColumnId = sourceDroppableId.columnId
+            const destinationColumnId = destinationDroppableId.columnId
+
+            if (sourceRowId === destinationRowId && sourceColumnId === destinationColumnId) {
+                const newRows = [...rows]
+                const row = newRows.find(row => row.id === sourceRowId)
+                if (!row) return
+                const column = row.columns.find(column => column.id === sourceColumnId)
+                if (!column) return
+                const [movedComponent] = column.components.splice(source.index, 1)
+                column.components.splice(destination.index, 0, movedComponent)
+                setRows(newRows)
+            }
+        }
+        console.log({ sourceDroppableId, destinationDroppableId, rows })
+        console.log({ source, destination })
     }
 
     return (
@@ -259,9 +279,6 @@ const TestsPage = () => {
                     </Droppable>
                 </aside>
                 <div className="w-full flex-grow-0 p-4 min-h-screen">
-                    <div>
-                        {JSON.stringify(rows)}
-                    </div>
                     <Droppable
                         droppableId={dndId.stringify({ type: 'droppable', name: 'container' })}
                         type="row"
@@ -286,4 +303,4 @@ const TestsPage = () => {
     )
 }
 
-export default TestsPage
+export default EditorPage
