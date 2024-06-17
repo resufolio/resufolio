@@ -45,6 +45,39 @@ interface RowSectionProps extends Row {
     index: number;
 }
 
+const SidebarGrids: React.FC = () => {
+    const grids: Grid[] = [
+        { columns: [6, 6] },
+        { columns: [4, 4, 4] },
+        { columns: [8, 4] },
+        { columns: [12] }
+    ]
+    return (
+        <>
+            <Droppable droppableId={`sidebar-grids-droppable`} isDropDisabled={true} type="row">
+                {(provided) => (
+                    <div ref={provided.innerRef} {...provided.droppableProps} className="w-[192px]">
+                        {grids.map((grid, index) => (
+                        <Draggable draggableId={`sidebar-grids-draggable-${index}`} index={index} key={index}>
+                            {(provided) => (
+                                <div
+                                    className="bg-gray-200 p-3 mb-5 w-48 rounded-lg user-select-none"
+                                    ref={provided.innerRef}
+                                    {...provided.draggableProps}
+                                    {...provided.dragHandleProps}>
+                                    {grid.columns.join(" ")}
+                                </div>
+                            )}
+                        </Draggable>)
+                        )}
+                        {provided.placeholder}
+                    </div>
+                )}
+            </Droppable>
+        </>
+    )
+}
+
 const RowSection: React.FC<RowSectionProps> = ({ id, columns, index }) => {
     return (
         <Droppable droppableId={`droppable-row-${id}`}>
@@ -104,7 +137,6 @@ const RowSectionContent: React.FC<Row> = ({ id, columns }) => {
 }
 
 const TestsPage = () => {
-    const [result, setResult] = useState<DropResult | null>(null)
     const [rows, setRows] = useState<Row[]>([
         {
             id: "row-1",
@@ -158,42 +190,17 @@ const TestsPage = () => {
         },
     ])
 
-    const grids: Grid[] = [
-        { columns: [6, 6] },
-        { columns: [4, 4, 4] },
-        { columns: [8, 4] },
-        { columns: [12] }
-    ]
-
     const handleDragEnd = (result: DropResult) => {
         const { destination } = result
         if (!destination) return
-        setResult(result)
+        console.log({ result, destination })
     }
 
     return (
-        <div>
         <div className="bg-white p-3 flex">
             <DragDropContext onDragEnd={handleDragEnd}>
                 <aside className="border-b w-full py-2 flex-1">
-                <Droppable droppableId="sidebar-grids-droppable" isDropDisabled={true} type="row">
-                        {(provided) => (
-                            <div ref={provided.innerRef} {...provided.droppableProps} className="w-[192px]">
-                                <Draggable draggableId="sidebar-grids-draggable" index={0}>
-                                    {(provided) => (
-                                        <div
-                                            className="bg-gray-200 p-3 mb-5 w-48 rounded-lg user-select-none"
-                                            ref={provided.innerRef}
-                                            {...provided.draggableProps}
-                                            {...provided.dragHandleProps}>
-                                            Grid
-                                        </div>
-                                    )}
-                                </Draggable>
-                                {provided.placeholder}
-                            </div>
-                        )}
-                    </Droppable>
+                    <SidebarGrids />
                     <Droppable droppableId="sidebar-components-droppable" isDropDisabled={true} type="component">
                         {(provided) => (
                             <div ref={provided.innerRef} {...provided.droppableProps} className="w-[192px]">
@@ -230,10 +237,6 @@ const TestsPage = () => {
 
                 </div>
             </DragDropContext>
-        </div>
-        <div className="bg-slate-800 text-white p-3 mt-5">
-            <pre className="whitespace-pre-wrap">{JSON.stringify(result, null, 2)}</pre>
-        </div>
         </div>
     )
 }
