@@ -52,7 +52,9 @@ interface DnDId <T extends string> {
     index?: number;
     rowId?: string;
     columnId?: string;
+    componentId?: number;
 }
+
 type DnDIdType = 'container' | 'sidebar-grids' | 'sidebar-components' | 'row' | 'column' | 'component'
 
 const dndId = {
@@ -149,7 +151,7 @@ const RowSectionContent: React.FC<Row> = ({ id, columns }) => {
                         {column.components.map((component, innerIndex) => (
                             <Draggable
                                 key={innerIndex}
-                                draggableId={dndId.stringify({ type: 'draggable', name: 'component', rowId: id, columnId: column.id })}
+                                draggableId={dndId.stringify({ type: 'draggable', name: 'component', rowId: id, columnId: column.id, componentId: innerIndex })}
                                 index={innerIndex}>
                                 {(provided) => (
                                     <div
@@ -211,7 +213,15 @@ const TestsPage = () => {
         }
         // Adding a new component to a column
         else if(sourceDroppableId.name === 'sidebar-components' && destinationDroppableId.name === 'column') {
-            alert("Adding component to column")
+            const columnId = destinationDroppableId.columnId
+            const rowId = destinationDroppableId.rowId
+            const newRows = [...rows]
+            const row = newRows.find(row => row.id === rowId)
+            if(!row) return
+            const column = row.columns.find(column => column.id === columnId)
+            if(!column) return
+            column.components.push({ id: Date.now().toString(), type: 'Component', props: {} })
+            setRows(newRows)
         }
         console.log({ sourceDroppableId, destinationDroppableId })
     }
