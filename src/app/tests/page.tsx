@@ -198,16 +198,19 @@ const RowSection: React.FC<RowSectionProps> = ({ id, columns, index }) => {
 
 const RowSectionContent: React.FC<Row> = ({ id, columns }) => {
     return (
-        <section className="inline-flex border border-slate-300 w-full">
+        <section className="inline-flex w-full">
         {columns.map((column, index) => (
             <Droppable
                 key={index}
                 droppableId={dndId.stringify({ type: 'droppable', name: 'column', rowId: id, columnId: column.id, index })}
                 type="component"
                 isCombineEnabled={false}>
-                {(provided) => (
+                {(provided, snapshot) => (
                     <div
-                        className={`border p-3 mb-5 rounded-lg user-select-none ${widthClassMap[column.width]}`}
+                        className={`bg-white border border-gray-300 relative pt-6 rounded-sm overflow-hidden
+                        before:content-['Column'] before:absolute before:left-0 before:top-0 before:bg-gray-50 before:text-xs
+                        before:font-semibold before:px-2 before:py-1 before:text-gray-500 min-h-[120px]
+                        before:rounded-br before:border-b before:border-r before:border-gray-200 ${widthClassMap[column.width]}`}
                         ref={provided.innerRef}
                         {...provided.droppableProps}>
                         {column.components.map((component, innerIndex) => (
@@ -217,7 +220,7 @@ const RowSectionContent: React.FC<Row> = ({ id, columns }) => {
                                 index={innerIndex}>
                                 {(provided) => (
                                     <div
-                                        className="bg-gray-200 p-3 mb-5 w-full rounded-lg user-select-none"
+                                        className="bg-gray-100 p-3 mb-5 w-full"
                                         ref={provided.innerRef}
                                         {...provided.draggableProps}
                                         {...provided.dragHandleProps}>
@@ -226,7 +229,7 @@ const RowSectionContent: React.FC<Row> = ({ id, columns }) => {
                                 )}
                             </Draggable>
                         ))}
-                        <div className="border border-gray-200 rounded-lg">{provided.placeholder}</div>
+                        <div className={`border border-gray-200 rounded-lg ${snapshot.isDraggingOver ? 'opacity-100' : 'opacity-0'}`}>{provided.placeholder}</div>
                     </div>
                 )}
             </Droppable>
