@@ -111,7 +111,7 @@ const SidebarComponents: React.FC<{components: Component[]}> = ({components}) =>
                     {components.map((component, index) => (
                         <Draggable
                             key={index}
-                            draggableId={dndId.stringify({ type: 'draggable', name: 'sidebar-components' })}
+                            draggableId={dndId.stringify({ type: 'draggable', name: 'sidebar-components', componentType: component.type, index})}
                             index={index}>
                             {(provided) => (
                                 <div
@@ -370,8 +370,11 @@ const EditorPage: React.FC = () => {
             if (!row) return
             const column = row.columns.find(column => column.id === columnId)
             if (!column) return
-            // const component: Component = components.find(component => component.type === sourceDraggableId.name)
-            column.components.push({ id: String(column.components.length + 1), type: 'Component', props: {} })
+            const component: Component|undefined = components.find(component => component.type === sourceDraggableId.componentType)
+            if (!component) return
+            const newComponents = [...column.components]
+            newComponents.splice(destination.index, 0, component)
+            column.components = newComponents
             setRows(newRows)
         }
         // Reordenar componentes dentro de uma coluna
