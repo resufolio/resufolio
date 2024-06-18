@@ -1,5 +1,5 @@
 "use client"
-import { DragDropContext, Draggable, DraggableProvided, Droppable, DropResult } from "@hello-pangea/dnd"
+import { DragDropContext, Draggable, DraggableProvided, DraggableStateSnapshot, Droppable, DropResult } from "@hello-pangea/dnd"
 import useLocalStorage from "@/hooks/useLocalStorage"
 import { FaArrowsAlt, FaTrash } from "react-icons/fa"
 import { PiLego } from "react-icons/pi"
@@ -47,6 +47,7 @@ interface Grid {
 interface RowSectionProps extends Row {
     index: number;
     handleDeleteRow: (id: string) => void;
+    handleDeleteComponent: (id: string) => void;
 }
 
 interface DnDId <T extends string> {
@@ -137,6 +138,8 @@ interface ActionsButtonsProps {
     handleDelete: (id: string) => void;
     id: string;
     provided: DraggableProvided;
+    position: 'inside' | 'outside';
+    snapshot?: DraggableStateSnapshot;
 }
 
 /**
@@ -147,12 +150,16 @@ interface ActionsButtonsProps {
  * @param {Function} props.handleDelete - The delete button click handler.
  * @param {string} props.id - The unique identifier for the component.
  * @param {object} props.provided - The provided object for drag and drop functionality.
+ * @param {string} props.position - The position of the action buttons.
  * @returns {JSX.Element} The rendered ActionButtons component.
  */
-const ActionButtons: React.FC<ActionsButtonsProps> = ({handleDelete, id, provided}) => {
+const ActionButtons: React.FC<ActionsButtonsProps> = ({handleDelete, id, provided, position = 'inside', snapshot}) => {
     return (
-        <div className='ml-auto absolute top-2 right-2 text-xs'>
-            <div className="p-1 bg-sky-400 inline-flex items-center transition rounded text-white hover:bg-blue-500 hover:opacity-100 active:bg-blue-500 active:opacity-100 opacity-30 cursor-grab mr-2" {...provided.dragHandleProps}>
+        <div className={`ml-auto absolute ${position === 'inside' ? '-top-2 -right-2' : 'top-2 right-2'} text-xs`}>
+            <div
+                className={`p-1 bg-sky-400 inline-flex items-center transition rounded text-white hover:bg-blue-500 hover:opacity-100 active:bg-blue-500 active:opacity-100 ${snapshot?.isDragging ? 'opacity-100' : 'opacity-30'} cursor-grab mr-2`}
+                {...provided.dragHandleProps}
+            >
                 <FaArrowsAlt />
                 <span className='ml-1'>Drag</span>
             </div>
@@ -223,9 +230,10 @@ const SidebarGrids: React.FC<{grids: Grid[]}> = ({grids}) => {
  * @param {number} props.columns - The number of columns in the row section.
  * @param {number} props.index - The index of the row section.
  * @param {Function} props.handleDeleteRow - The function to handle row deletion.
+ * @param {Function} props.handleDeleteComponent - The function to handle component deletion.
  * @returns {JSX.Element} The rendered RowSection component.
  */
-const RowSection: React.FC<RowSectionProps> = ({ id, columns, index, handleDeleteRow }) => {
+const RowSection: React.FC<RowSectionProps> = ({ id, columns, index, handleDeleteRow, handleDeleteComponent }) => {
     return (
         <Droppable
             droppableId={dndId.stringify({ type: 'droppable', name: 'row', rowId: id })}
@@ -238,7 +246,7 @@ const RowSection: React.FC<RowSectionProps> = ({ id, columns, index, handleDelet
                     <Draggable
                         draggableId={dndId.stringify({ type: 'draggable', name: 'row', rowId: id })}
                         index={index}>
-                        {(provided) => (
+                        {(provided, snapshot) => (
                             <section
                                 className={`relative p-2 overflow-hidden mb-1 rounded border pt-12 bg-gray-100 border-gray-300 shadow-inner
                                 before:absolute before:left-0 before:top-0 before:bg-gray-50 before:text-xs
@@ -247,10 +255,14 @@ const RowSection: React.FC<RowSectionProps> = ({ id, columns, index, handleDelet
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
                                 {...provided.dragHandleProps}>
-                                <ActionButtons handleDelete={handleDeleteRow} id={id} provided={provided} />
-                                <div>
-                                    <RowSectionContent id={id} columns={columns} />
-                                </div>
+                                <ActionButtons
+                                    handleDelete={handleDeleteRow}
+                                    id={id}
+                                    position="outside"
+                                    provided={provided}
+                                    snapshot={snapshot}
+                                />
+                                <RowSectionContent handleDeleteComponent={handleDeleteComponent}  id={id} columns={columns} />
                             </section>
                         )}
                     </Draggable>
@@ -283,6 +295,10 @@ const ComponentRenderer: React.FC<{ component: ComponentInterface }> = ({ compon
     ) : null
 }
 
+interface RowSectionContentProps extends Row {
+    handleDeleteComponent: (id: string) => void;
+}
+
 /**
  * Renders the content of a row section.
  *
@@ -290,7 +306,7 @@ const ComponentRenderer: React.FC<{ component: ComponentInterface }> = ({ compon
  * @param {Row} props - The props containing the row ID and columns.
  * @returns {JSX.Element} The rendered row section content.
  */
-const RowSectionContent: React.FC<Row> = ({ id, columns }) => {
+const RowSectionContent: React.FC<RowSectionContentProps> = ({ id, columns, handleDeleteComponent }) => {
     return (
         <section className="inline-flex w-full">
         {columns.map((column, index) => (
@@ -314,13 +330,24 @@ const RowSectionContent: React.FC<Row> = ({ id, columns }) => {
                                 key={innerIndex}
                                 draggableId={dndId.stringify({ type: 'draggable', name: 'component', rowId: id, columnId: column.id, componentId: innerIndex, componentType: component.type })}
                                 index={innerIndex}>
-                                {(provided) => (
+                                {(provided, snapshot) => (
                                     <div
                                         className="bg-white border border-gray-100 p-3 mb-5 w-full"
                                         ref={provided.innerRef}
                                         {...provided.draggableProps}
                                         {...provided.dragHandleProps}>
-                                        <ComponentRenderer component={component} />
+                                        <div className="relative">
+                                            <div className="relative">
+                                                <ActionButtons
+                                                    handleDelete={handleDeleteComponent}
+                                                    snapshot={snapshot}
+                                                    id={component.id}
+                                                    provided={provided}
+                                                    position="inside"
+                                                />
+                                            </div>
+                                            <ComponentRenderer component={component} />
+                                        </div>
                                     </div>
                                 )}
                             </Draggable>
@@ -434,12 +461,14 @@ const EditorPage: React.FC = () => {
         destinationColumn.components.splice(destination.index, 0, removed)
         setRows(newRows)
       }
-      console.log({ sourceDroppableId, destinationDroppableId, sourceDraggableId })
-      console.log({ source, destination, result })
     }
 
     if (!isLoaded) {
       return null
+    }
+
+    function handleDeleteComponent(id: string): void {
+        throw new Error('Function not implemented. ' + id)
     }
 
     return (
@@ -476,6 +505,7 @@ const EditorPage: React.FC = () => {
                         key={row.id}
                         index={index}
                         {...row}
+                        handleDeleteComponent={handleDeleteComponent}
                         handleDeleteRow={handleDeleteRow}
                       />
                     ))}
