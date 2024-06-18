@@ -260,7 +260,8 @@ const RowSectionContent: React.FC<Row> = ({ id, columns }) => {
                         className={`transition border border-gray-300 relative pt-6 rounded-sm overflow-hidden
                         before:content-['Column'] before:absolute before:left-0 before:top-0 before:bg-gray-50 before:text-xs
                         before:font-semibold before:px-2 before:py-1 before:text-gray-500 min-h-[120px]
-                        ${snapshot.isDraggingOver ? 'bg-blue-50' : 'bg-white'}
+                        ${snapshot.draggingFromThisWith ? 'bg-orange-100' : 'bg-white'}
+                        ${snapshot.isDraggingOver ? 'bg-sky-100' : 'bg-white'}
                         before:rounded-br before:border-b before:border-r before:border-gray-200 ${widthClassMap[column.width]}`}
                         ref={provided.innerRef}
                         {...provided.droppableProps}>
@@ -271,7 +272,7 @@ const RowSectionContent: React.FC<Row> = ({ id, columns }) => {
                                 index={innerIndex}>
                                 {(provided) => (
                                     <div
-                                        className="bg-gray-100 p-3 mb-5 w-full"
+                                        className="bg-white border border-gray-100 p-3 mb-5 w-full"
                                         ref={provided.innerRef}
                                         {...provided.draggableProps}
                                         {...provided.dragHandleProps}>
