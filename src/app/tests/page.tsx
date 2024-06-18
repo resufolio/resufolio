@@ -4,6 +4,7 @@ import useLocalStorage from "@/hooks/useLocalStorage"
 import { FaArrowsAlt, FaTrash } from "react-icons/fa"
 import { PiLego } from "react-icons/pi"
 import { RiGridLine } from "react-icons/ri"
+import { useState } from "react"
 
 /**
 * Mapping of numbers to tailwind classes representing width values.
@@ -378,12 +379,15 @@ const gridToRow = (grid: Grid, index: number): Row => {
     }
 }
 
+type SidebarTabs = 'elements' | 'metadata'
+
 /**
  * EditorPage component represents the page editor for creating and editing pages.
  * It allows users to add and arrange rows and components within a grid-based layout.
  */
 const EditorPage: React.FC = () => {
     const [rows, setRows, isLoaded] = useLocalStorage<Row[]>('rows', [])
+    const [activeTab, setActiveTab] = useState<SidebarTabs>('elements')
     const grids: Grid[] = [
       { columns: [6, 6] },
       { columns: [4, 4, 4] },
@@ -477,14 +481,33 @@ const EditorPage: React.FC = () => {
         <div className="bg-slate-900 flex min-h-screen text-sm">
           <DragDropContext onDragEnd={handleDragEnd}>
             <aside className="w-[210px] py-2 bg-slate-900 top-0 sticky max-h-screen z-20">
-              <div className="pl-3 pr-2">
-                <SidebarTitle title='Grid system' icon={<RiGridLine />} />
-                <SidebarGrids grids={grids} />
-              </div>
-              <div className="pl-3 pr-2 mt-4">
-                <SidebarTitle title='Components' icon={<PiLego />} />
-                <SidebarComponents components={components} />
-              </div>
+              <ul className="flex text-[0.7rem] border-b border-slate-700 mb-4">
+                {['elements', 'metadata'].map((tab) => (
+                    <li
+                        key={tab}
+                        className={`p-2 cursor-pointer capitalize ${activeTab === tab ? 'font-semibold text-white' : 'font-normal text-gray-100'}`}
+                        onClick={() => setActiveTab(tab as SidebarTabs)}>
+                        {tab}
+                    </li>
+                ))}
+              </ul>
+              {activeTab === 'elements' && (
+              <>
+                <div className="pl-3 pr-2">
+                    <SidebarTitle title='Grid system' icon={<RiGridLine />} />
+                    <SidebarGrids grids={grids} />
+                </div>
+                <div className="pl-3 pr-2 mt-4">
+                    <SidebarTitle title='Components' icon={<PiLego />} />
+                    <SidebarComponents components={components} />
+                </div>
+                </>
+            )}
+            {activeTab === 'metadata' && (
+                <div className="pl-3 pr-2">
+                    <SidebarTitle title='Base' />
+                </div>
+            )}
             </aside>
             <main
               className={`flex-1 px-3 pt-10 bg-white min-h-full border rounded-sm border-gray-300 m-2 relative
