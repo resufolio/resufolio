@@ -23,7 +23,7 @@ const widthClassMap: Record<number, string> = {
     12: 'w-full',
 }
 
-interface Component {
+interface ComponentInterface {
     id: string;
     type: string;
     props: Record<string, any>;
@@ -31,7 +31,7 @@ interface Component {
 
 interface Column {
     id: string;
-    components: Component[];
+    components: ComponentInterface[];
     width: number;
 }
 
@@ -99,7 +99,7 @@ const SidebarTitle: React.FC<{ title: string, icon?: React.ReactNode }> = ({ tit
  * SidebarComponents component.
  * Renders the sidebar components.
  */
-const SidebarComponents: React.FC<{components: Component[]}> = ({components}) => {
+const SidebarComponents: React.FC<{components: ComponentInterface[]}> = ({components}) => {
     return (
         <Droppable
             droppableId={dndId.stringify({ type: 'droppable', name: 'sidebar-components' })}
@@ -239,6 +239,28 @@ const RowSection: React.FC<RowSectionProps> = ({ id, columns, index, handleDelet
     )
 }
 
+const ComponentsMap: Record<string, React.FC<any>> = {
+    Article: ({ title, content }: { title: string, content: string }) => (
+        <div>
+            <h1 className="text-2xl font-semibold">{title}</h1>
+            <p className="text-lg text-slate-800">{content}</p>
+        </div>
+    ),
+    Card: ({ title, content }: { title: string, content: string }) => (
+        <div>
+            <h2 className="text-lg font-semibold">{title}</h2>
+            <p className="text-sm text-slate-800">{content}</p>
+        </div>
+    )
+}
+
+const ComponentRenderer: React.FC<{ component: ComponentInterface }> = ({ component }) => {
+    const Component = ComponentsMap[component.type]
+    return Component ? (
+      <Component {...component.props} />
+    ) : null
+}
+
 /**
  * Renders the content of a row section.
  *
@@ -276,7 +298,7 @@ const RowSectionContent: React.FC<Row> = ({ id, columns }) => {
                                         ref={provided.innerRef}
                                         {...provided.draggableProps}
                                         {...provided.dragHandleProps}>
-                                        {JSON.stringify(component)}
+                                        <ComponentRenderer component={component} />
                                     </div>
                                 )}
                             </Draggable>
@@ -324,7 +346,7 @@ const EditorPage: React.FC = () => {
       setRows(rows.filter(row => row.id !== id))
     }
 
-    const components: Component[] = [
+    const components: ComponentInterface[] = [
       {
         id: '1',
         type: 'Article',
@@ -368,7 +390,7 @@ const EditorPage: React.FC = () => {
         if (!row) return
         const column = row.columns.find(column => column.id === columnId)
         if (!column) return
-        const component: Component | undefined = components.find(component => component.type === sourceDraggableId.componentType)
+        const component: ComponentInterface | undefined = components.find(component => component.type === sourceDraggableId.componentType)
         if (!component) return
         const newComponents = [...column.components]
         newComponents.splice(destination.index, 0, component)
