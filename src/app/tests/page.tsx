@@ -312,141 +312,139 @@ const gridToRow = (grid: Grid, index: number): Row => {
  * It allows users to add and arrange rows and components within a grid-based layout.
  */
 const EditorPage: React.FC = () => {
-    const [rows, setRows] = useLocalStorage<Row[]>('rows', [])
+    const [rows, setRows, isLoaded] = useLocalStorage<Row[]>('rows', [])
     const grids: Grid[] = [
-        { columns: [6, 6] },
-        { columns: [4, 4, 4] },
-        { columns: [8, 4] },
-        { columns: [12] }
+      { columns: [6, 6] },
+      { columns: [4, 4, 4] },
+      { columns: [8, 4] },
+      { columns: [12] }
     ]
 
     const handleDeleteRow = (id: string) => {
-        setRows(rows.filter(row => row.id !== id))
+      setRows(rows.filter(row => row.id !== id))
     }
 
     const components: Component[] = [
-        {
-            id: '1',
-            type: 'Article',
-            props: {
-                title: 'Article Title',
-                content: 'Article Content',
-            }
-        },
-        {
-            id: '2',
-            type: 'Card',
-            props: {
-                title: 'Card Title',
-                content: 'Card Content',
-            }
+      {
+        id: '1',
+        type: 'Article',
+        props: {
+          title: 'Article Title',
+          content: 'Article Content',
         }
+      },
+      {
+        id: '2',
+        type: 'Card',
+        props: {
+          title: 'Card Title',
+          content: 'Card Content',
+        }
+      }
     ]
 
     const handleDragEnd = (result: DropResult) => {
-        const { destination, source, draggableId } = result
-        if (!destination) return
-        if(source.droppableId === destination.droppableId && source.index === destination.index) return
-        const sourceDroppableId = dndId.parse(source.droppableId)
-        const destinationDroppableId = dndId.parse(destination.droppableId)
-        const sourceDraggableId = dndId.parse(draggableId)
-        // Adicionar uma nova linha a partir da sidebar
-        if (sourceDroppableId.name === 'sidebar-grids' && destinationDroppableId.name === 'container') {
-            const grid: Grid = grids[source.index]
-            const row: Row = gridToRow(grid, rows.length)
-            setRows([...rows, row])
-        }
-        // Reordenar linhas dentro do container
-        else if (sourceDroppableId.name === 'row' && destinationDroppableId.name === 'row') {
-            const newRows = [...rows]
-            const [removed] = newRows.splice(source.index, 1)
-            newRows.splice(destination.index, 0, removed)
-            setRows(newRows)
-        }
-        // Adicionar um novo componente a uma coluna
-        else if (sourceDroppableId.name === 'sidebar-components' && destinationDroppableId.name === 'column') {
-            const columnId = destinationDroppableId.columnId
-            const rowId = destinationDroppableId.rowId
-            const newRows = [...rows]
-            const row = newRows.find(row => row.id === rowId)
-            if (!row) return
-            const column = row.columns.find(column => column.id === columnId)
-            if (!column) return
-            const component: Component|undefined = components.find(component => component.type === sourceDraggableId.componentType)
-            if (!component) return
-            const newComponents = [...column.components]
-            newComponents.splice(destination.index, 0, component)
-            column.components = newComponents
-            setRows(newRows)
-        }
-        // Reordenar componentes dentro de uma coluna
-        else if (sourceDroppableId.name === 'column' && destinationDroppableId.name === 'column') {
-            const sourceRowId = sourceDroppableId.rowId
-            const destinationRowId = destinationDroppableId.rowId
-            const sourceColumnId = sourceDroppableId.columnId
-            const destinationColumnId = destinationDroppableId.columnId
-            const newRows = [...rows]
-            const sourceRow = newRows.find(row => row.id === sourceRowId)
-            const destinationRow = newRows.find(row => row.id === destinationRowId)
-            if (!sourceRow || !destinationRow) return
-            const sourceColumn = sourceRow.columns.find(column => column.id === sourceColumnId)
-            const destinationColumn = destinationRow.columns.find(column => column.id === destinationColumnId)
-            if (!sourceColumn || !destinationColumn) return
-            const [removed] = sourceColumn.components.splice(source.index, 1)
-            destinationColumn.components.splice(destination.index, 0, removed)
-            setRows(newRows)
-        }
-        console.log({ sourceDroppableId, destinationDroppableId, sourceDraggableId })
-        console.log({ source, destination, result })
+      const { destination, source, draggableId } = result
+      if (!destination) return
+      if (source.droppableId === destination.droppableId && source.index === destination.index) return
+      const sourceDroppableId = dndId.parse(source.droppableId)
+      const destinationDroppableId = dndId.parse(destination.droppableId)
+      const sourceDraggableId = dndId.parse(draggableId)
+
+      if (sourceDroppableId.name === 'sidebar-grids' && destinationDroppableId.name === 'container') {
+        const grid: Grid = grids[source.index]
+        const row: Row = gridToRow(grid, rows.length)
+        setRows([...rows, row])
+      } else if (sourceDroppableId.name === 'row' && destinationDroppableId.name === 'row') {
+        const newRows = [...rows]
+        const [removed] = newRows.splice(source.index, 1)
+        newRows.splice(destination.index, 0, removed)
+        setRows(newRows)
+      } else if (sourceDroppableId.name === 'sidebar-components' && destinationDroppableId.name === 'column') {
+        const columnId = destinationDroppableId.columnId
+        const rowId = destinationDroppableId.rowId
+        const newRows = [...rows]
+        const row = newRows.find(row => row.id === rowId)
+        if (!row) return
+        const column = row.columns.find(column => column.id === columnId)
+        if (!column) return
+        const component: Component | undefined = components.find(component => component.type === sourceDraggableId.componentType)
+        if (!component) return
+        const newComponents = [...column.components]
+        newComponents.splice(destination.index, 0, component)
+        column.components = newComponents
+        setRows(newRows)
+      } else if (sourceDroppableId.name === 'column' && destinationDroppableId.name === 'column') {
+        const sourceRowId = sourceDroppableId.rowId
+        const destinationRowId = destinationDroppableId.rowId
+        const sourceColumnId = sourceDroppableId.columnId
+        const destinationColumnId = destinationDroppableId.columnId
+        const newRows = [...rows]
+        const sourceRow = newRows.find(row => row.id === sourceRowId)
+        const destinationRow = newRows.find(row => row.id === destinationRowId)
+        if (!sourceRow || !destinationRow) return
+        const sourceColumn = sourceRow.columns.find(column => column.id === sourceColumnId)
+        const destinationColumn = destinationRow.columns.find(column => column.id === destinationColumnId)
+        if (!sourceColumn || !destinationColumn) return
+        const [removed] = sourceColumn.components.splice(source.index, 1)
+        destinationColumn.components.splice(destination.index, 0, removed)
+        setRows(newRows)
+      }
+      console.log({ sourceDroppableId, destinationDroppableId, sourceDraggableId })
+      console.log({ source, destination, result })
+    }
+
+    if (!isLoaded) {
+      return null
     }
 
     return (
-        <>
+      <>
         <title>Page Wizard: Page Editor</title>
         <div className="bg-slate-900 flex min-h-screen text-sm">
-            <DragDropContext onDragEnd={handleDragEnd}>
-                <aside className="w-[210px] py-2 bg-slate-900 top-0 sticky max-h-screen z-20">
-                    <div className="px-2">
-                        <SidebarTitle title='Grid system' icon={<RiGridLine/>} />
-                        <SidebarGrids grids={grids} />
-                    </div>
-                    <div className="px-2 mt-4">
-                        <SidebarTitle title='Components' icon={<PiLego />} />
-                        <SidebarComponents components={components} />
-                    </div>
-                </aside>
-                <div
-                    className={`flex-1 px-3 pt-10 bg-white min-h-full border rounded-sm border-gray-300 m-2 relative
-                    before:content-['Container'] before:absolute before:left-0 before:top-0 before:bg-gray-100 before:text-xs
-                    before:font-semibold before:px-2 before:py-1 before:text-gray-500
-                    before:rounded-br before:border-r before:border-b before:border-gray-300
-                    `}>
-                    <Droppable
-                        droppableId={dndId.stringify({ type: 'droppable', name: 'container' })}
-                        type="row"
-                        isCombineEnabled={false}>
-                        {(provided) => (
-                            <div
-                                className="w-full min-h-screen"
-                                ref={provided.innerRef}
-                                {...provided.droppableProps}>
-                                    {rows.map((row, index) => (
-                                        <RowSection
-                                            key={row.id}
-                                            index={index}
-                                            {...row}
-                                            handleDeleteRow={handleDeleteRow}
-                                        />
-                                    ))}
-                                {provided.placeholder}
-                            </div>
-                        )}
-                    </Droppable>
-                </div>
-            </DragDropContext>
+          <DragDropContext onDragEnd={handleDragEnd}>
+            <aside className="w-[210px] py-2 bg-slate-900 top-0 sticky max-h-screen z-20">
+              <div className="px-2">
+                <SidebarTitle title='Grid system' icon={<RiGridLine />} />
+                <SidebarGrids grids={grids} />
+              </div>
+              <div className="px-2 mt-4">
+                <SidebarTitle title='Components' icon={<PiLego />} />
+                <SidebarComponents components={components} />
+              </div>
+            </aside>
+            <div
+              className={`flex-1 px-3 pt-10 bg-white min-h-full border rounded-sm border-gray-300 m-2 relative
+                      before:content-['Container'] before:absolute before:left-0 before:top-0 before:bg-gray-100 before:text-xs
+                      before:font-semibold before:px-2 before:py-1 before:text-gray-500
+                      before:rounded-br before:border-r before:border-b before:border-gray-300
+                      `}>
+              <Droppable
+                droppableId={dndId.stringify({ type: 'droppable', name: 'container' })}
+                type="row"
+                isCombineEnabled={false}>
+                {(provided) => (
+                  <div
+                    className="w-full min-h-screen"
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}>
+                    {rows.map((row, index) => (
+                      <RowSection
+                        key={row.id}
+                        index={index}
+                        {...row}
+                        handleDeleteRow={handleDeleteRow}
+                      />
+                    ))}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            </div>
+          </DragDropContext>
         </div>
-    </>
+      </>
     )
-}
+  }
 
 export default EditorPage
