@@ -375,7 +375,7 @@ const EditorPage: React.FC = () => {
         <title>Page Wizard: Page Editor</title>
         <div className="bg-slate-900 flex min-h-screen text-sm">
             <DragDropContext onDragEnd={handleDragEnd}>
-                <aside className="border-b w-[210px] py-2 bg-slate-900">
+                <aside className="w-[210px] py-2 bg-slate-900 top-0 sticky max-h-screen">
                     <div className="px-2">
                         <SidebarTitle title='Grid system' icon={<RiGridLine/>} />
                         <SidebarGrids grids={grids} />
