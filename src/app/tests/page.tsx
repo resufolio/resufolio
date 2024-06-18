@@ -1,5 +1,5 @@
 "use client"
-import { DragDropContext, Draggable, Droppable, DropResult } from "@hello-pangea/dnd"
+import { DragDropContext, Draggable, DraggableProvided, Droppable, DropResult } from "@hello-pangea/dnd"
 import useLocalStorage from "@/hooks/useLocalStorage"
 import { FaArrowsAlt, FaTrash } from "react-icons/fa"
 import { PiLego } from "react-icons/pi"
@@ -133,6 +133,39 @@ const SidebarComponents: React.FC<{components: ComponentInterface[]}> = ({compon
     )
 }
 
+interface ActionsButtonsProps {
+    handleDelete: (id: string) => void;
+    id: string;
+    provided: DraggableProvided;
+}
+
+/**
+ * ActionButtons component.
+ *
+ * @component
+ * @param {ActionsButtonsProps} props - The component props.
+ * @param {Function} props.handleDelete - The delete button click handler.
+ * @param {string} props.id - The unique identifier for the component.
+ * @param {object} props.provided - The provided object for drag and drop functionality.
+ * @returns {JSX.Element} The rendered ActionButtons component.
+ */
+const ActionButtons: React.FC<ActionsButtonsProps> = ({handleDelete, id, provided}) => {
+    return (
+        <div className='ml-auto absolute top-2 right-2 text-xs'>
+            <div className="p-1 bg-sky-400 inline-flex items-center transition rounded text-white hover:bg-blue-500 hover:opacity-100 active:bg-blue-500 active:opacity-100 opacity-30 cursor-grab mr-2" {...provided.dragHandleProps}>
+                <FaArrowsAlt />
+                <span className='ml-1'>Drag</span>
+            </div>
+            <button
+                onClick={() => handleDelete(id)}
+                className="bg-red-400 inline-flex items-center hover:bg-red-500 opacity-30 hover:opacity-100 text-white rounded p-1 cursor-pointer">
+                <FaTrash/>
+                <span className='ml-1'>Delete</span>
+            </button>
+        </div>
+    )
+}
+
 /**
  * Renders a sidebar grid component.
  *
@@ -214,18 +247,7 @@ const RowSection: React.FC<RowSectionProps> = ({ id, columns, index, handleDelet
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
                                 {...provided.dragHandleProps}>
-                                <div className='ml-auto absolute top-2 right-2 text-xs'>
-                                    <div className="p-1 bg-sky-400 inline-flex items-center transition rounded text-white hover:bg-blue-500 hover:opacity-100 active:bg-blue-500 active:opacity-100 opacity-30 cursor-grab mr-2" {...provided.dragHandleProps}>
-                                        <FaArrowsAlt />
-                                        <span className='ml-1'>Drag</span>
-                                    </div>
-                                    <button
-                                        onClick={() => handleDeleteRow(id)}
-                                        className="bg-red-400 inline-flex items-center hover:bg-red-500 opacity-30 hover:opacity-100 text-white rounded p-1 cursor-pointer">
-                                        <FaTrash/>
-                                        <span className='ml-1'>Delete</span>
-                                    </button>
-                                </div>
+                                <ActionButtons handleDelete={handleDeleteRow} id={id} provided={provided} />
                                 <div>
                                     <RowSectionContent id={id} columns={columns} />
                                 </div>
@@ -437,10 +459,9 @@ const EditorPage: React.FC = () => {
             </aside>
             <main
               className={`flex-1 px-3 pt-10 bg-white min-h-full border rounded-sm border-gray-300 m-2 relative
-                      before:content-['Container'] before:absolute before:left-0 before:top-0 before:bg-gray-100 before:text-xs
-                      before:font-semibold before:px-2 before:py-1 before:text-gray-500
-                      before:rounded-br before:border-r before:border-b before:border-gray-300
-                      `}>
+                before:content-['Container'] before:absolute before:left-0 before:top-0 before:bg-gray-100 before:text-xs
+                before:font-semibold before:px-2 before:py-1 before:text-gray-500
+                before:rounded-br before:border-r before:border-b before:border-gray-300`}>
               <Droppable
                 droppableId={dndId.stringify({ type: 'droppable', name: 'container' })}
                 type="row"
