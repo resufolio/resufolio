@@ -1,6 +1,6 @@
 "use client"
 import { DragDropContext, Draggable, Droppable, DropResult } from "@hello-pangea/dnd"
-import { useState } from "react"
+import useLocalStorage from "@/hooks/useLocalStorage"
 import { FaArrowsAlt, FaTrash } from "react-icons/fa"
 import { PiLego } from "react-icons/pi"
 import { RiGridLine } from "react-icons/ri"
@@ -306,7 +306,7 @@ const gridToRow = (grid: Grid, index: number): Row => {
  * It allows users to add and arrange rows and components within a grid-based layout.
  */
 const EditorPage: React.FC = () => {
-    const [rows, setRows] = useState<Row[]>([])
+    const [rows, setRows] = useLocalStorage<Row[]>('rows', [])
     const grids: Grid[] = [
         { columns: [6, 6] },
         { columns: [4, 4, 4] },
