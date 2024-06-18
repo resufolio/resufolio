@@ -426,16 +426,16 @@ const EditorPage: React.FC = () => {
         <div className="bg-slate-900 flex min-h-screen text-sm">
           <DragDropContext onDragEnd={handleDragEnd}>
             <aside className="w-[210px] py-2 bg-slate-900 top-0 sticky max-h-screen z-20">
-              <div className="px-2">
+              <div className="pl-3 pr-2">
                 <SidebarTitle title='Grid system' icon={<RiGridLine />} />
                 <SidebarGrids grids={grids} />
               </div>
-              <div className="px-2 mt-4">
+              <div className="pl-3 pr-2 mt-4">
                 <SidebarTitle title='Components' icon={<PiLego />} />
                 <SidebarComponents components={components} />
               </div>
             </aside>
-            <div
+            <main
               className={`flex-1 px-3 pt-10 bg-white min-h-full border rounded-sm border-gray-300 m-2 relative
                       before:content-['Container'] before:absolute before:left-0 before:top-0 before:bg-gray-100 before:text-xs
                       before:font-semibold before:px-2 before:py-1 before:text-gray-500
@@ -462,7 +462,7 @@ const EditorPage: React.FC = () => {
                   </div>
                 )}
               </Droppable>
-            </div>
+            </main>
           </DragDropContext>
         </div>
       </>
