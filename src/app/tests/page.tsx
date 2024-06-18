@@ -257,9 +257,10 @@ const RowSectionContent: React.FC<Row> = ({ id, columns }) => {
                 isCombineEnabled={false}>
                 {(provided, snapshot) => (
                     <div
-                        className={`bg-white border border-gray-300 relative pt-6 rounded-sm overflow-hidden
+                        className={`transition border border-gray-300 relative pt-6 rounded-sm overflow-hidden
                         before:content-['Column'] before:absolute before:left-0 before:top-0 before:bg-gray-50 before:text-xs
                         before:font-semibold before:px-2 before:py-1 before:text-gray-500 min-h-[120px]
+                        ${snapshot.isDraggingOver ? 'bg-blue-50' : 'bg-white'}
                         before:rounded-br before:border-b before:border-r before:border-gray-200 ${widthClassMap[column.width]}`}
                         ref={provided.innerRef}
                         {...provided.droppableProps}>
@@ -274,12 +275,12 @@ const RowSectionContent: React.FC<Row> = ({ id, columns }) => {
                                         ref={provided.innerRef}
                                         {...provided.draggableProps}
                                         {...provided.dragHandleProps}>
-                                        {component.type}
+                                        {JSON.stringify(component)}
                                     </div>
                                 )}
                             </Draggable>
                         ))}
-                        <div className={`border border-gray-200 rounded-lg ${snapshot.isDraggingOver ? 'opacity-100' : 'opacity-0'}`}>{provided.placeholder}</div>
+                        <div className={`border m-2 border-gray-200 rounded-lg ${snapshot.isDraggingOver ? 'opacity-100' : 'opacity-0'}`}>{provided.placeholder}</div>
                     </div>
                 )}
             </Droppable>
@@ -403,7 +404,7 @@ const EditorPage: React.FC = () => {
         <title>Page Wizard: Page Editor</title>
         <div className="bg-slate-900 flex min-h-screen text-sm">
             <DragDropContext onDragEnd={handleDragEnd}>
-                <aside className="w-[210px] py-2 bg-slate-900 top-0 sticky max-h-screen">
+                <aside className="w-[210px] py-2 bg-slate-900 top-0 sticky max-h-screen z-20">
                     <div className="px-2">
                         <SidebarTitle title='Grid system' icon={<RiGridLine/>} />
                         <SidebarGrids grids={grids} />
