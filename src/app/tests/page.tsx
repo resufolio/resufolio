@@ -56,6 +56,7 @@ interface DnDId <T extends string> {
     rowId?: string;
     columnId?: string;
     componentId?: number;
+    componentType?: string;
 }
 
 type DnDIdType = 'container' | 'sidebar-grids' | 'sidebar-components' | 'row' | 'column' | 'component'
@@ -98,7 +99,7 @@ const SidebarTitle: React.FC<{ title: string, icon?: React.ReactNode }> = ({ tit
  * SidebarComponents component.
  * Renders the sidebar components.
  */
-const SidebarComponents: React.FC = () => {
+const SidebarComponents: React.FC<{components: Component[]}> = ({components}) => {
     return (
         <Droppable
             droppableId={dndId.stringify({ type: 'droppable', name: 'sidebar-components' })}
@@ -107,21 +108,24 @@ const SidebarComponents: React.FC = () => {
             isCombineEnabled={false}>
             {(provided) => (
                 <div ref={provided.innerRef} {...provided.droppableProps} className="w-[192px]">
-                    <Draggable
-                        draggableId={dndId.stringify({ type: 'draggable', name: 'sidebar-components' })}
-                        index={0}>
-                        {(provided) => (
-                            <div
-                                className="user-select-none w-full"
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}>
-                                <DraggableButton>
-                                    component
-                                </DraggableButton>
-                            </div>
-                        )}
-                    </Draggable>
+                    {components.map((component, index) => (
+                        <Draggable
+                            key={index}
+                            draggableId={dndId.stringify({ type: 'draggable', name: 'sidebar-components' })}
+                            index={index}>
+                            {(provided) => (
+                                <div
+                                    className="user-select-none w-full"
+                                    ref={provided.innerRef}
+                                    {...provided.draggableProps}
+                                    {...provided.dragHandleProps}>
+                                    <DraggableButton>
+                                        {component.type}
+                                    </DraggableButton>
+                                </div>
+                            )}
+                        </Draggable>
+                    ))}
                     {provided.placeholder}
                 </div>
             )}
@@ -262,7 +266,7 @@ const RowSectionContent: React.FC<Row> = ({ id, columns }) => {
                         {column.components.map((component, innerIndex) => (
                             <Draggable
                                 key={innerIndex}
-                                draggableId={dndId.stringify({ type: 'draggable', name: 'component', rowId: id, columnId: column.id, componentId: innerIndex })}
+                                draggableId={dndId.stringify({ type: 'draggable', name: 'component', rowId: id, columnId: column.id, componentId: innerIndex, componentType: component.type })}
                                 index={innerIndex}>
                                 {(provided) => (
                                     <div
@@ -270,7 +274,7 @@ const RowSectionContent: React.FC<Row> = ({ id, columns }) => {
                                         ref={provided.innerRef}
                                         {...provided.draggableProps}
                                         {...provided.dragHandleProps}>
-                                        {JSON.stringify(component)}
+                                        {component.type}
                                     </div>
                                 )}
                             </Draggable>
@@ -318,12 +322,32 @@ const EditorPage: React.FC = () => {
         setRows(rows.filter(row => row.id !== id))
     }
 
+    const components: Component[] = [
+        {
+            id: '1',
+            type: 'Article',
+            props: {
+                title: 'Article Title',
+                content: 'Article Content',
+            }
+        },
+        {
+            id: '2',
+            type: 'Card',
+            props: {
+                title: 'Card Title',
+                content: 'Card Content',
+            }
+        }
+    ]
+
     const handleDragEnd = (result: DropResult) => {
-        const { destination, source } = result
+        const { destination, source, draggableId } = result
         if (!destination) return
         if(source.droppableId === destination.droppableId && source.index === destination.index) return
         const sourceDroppableId = dndId.parse(source.droppableId)
         const destinationDroppableId = dndId.parse(destination.droppableId)
+        const sourceDraggableId = dndId.parse(draggableId)
         // Adicionar uma nova linha a partir da sidebar
         if (sourceDroppableId.name === 'sidebar-grids' && destinationDroppableId.name === 'container') {
             const grid: Grid = grids[source.index]
@@ -346,6 +370,7 @@ const EditorPage: React.FC = () => {
             if (!row) return
             const column = row.columns.find(column => column.id === columnId)
             if (!column) return
+            // const component: Component = components.find(component => component.type === sourceDraggableId.name)
             column.components.push({ id: String(column.components.length + 1), type: 'Component', props: {} })
             setRows(newRows)
         }
@@ -366,8 +391,8 @@ const EditorPage: React.FC = () => {
             destinationColumn.components.splice(destination.index, 0, removed)
             setRows(newRows)
         }
-        console.log({ sourceDroppableId, destinationDroppableId, rows })
-        console.log({ source, destination })
+        console.log({ sourceDroppableId, destinationDroppableId, sourceDraggableId })
+        console.log({ source, destination, result })
     }
 
     return (
@@ -382,7 +407,7 @@ const EditorPage: React.FC = () => {
                     </div>
                     <div className="px-2 mt-4">
                         <SidebarTitle title='Components' icon={<PiLego />} />
-                        <SidebarComponents />
+                        <SidebarComponents components={components} />
                     </div>
                 </aside>
                 <div
@@ -412,7 +437,6 @@ const EditorPage: React.FC = () => {
                             </div>
                         )}
                     </Droppable>
-
                 </div>
             </DragDropContext>
         </div>
