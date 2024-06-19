@@ -5,13 +5,13 @@ import useLocalStorage from '@/hooks/useLocalStorage'
 import { RiGridLine } from "react-icons/ri"
 import { PiLego } from "react-icons/pi"
 import SidebarTitle from '@/components/admin/SidebarTitle'
-import SidebarGrids from '@/components/admin//SidebarGrids'
-import SidebarComponents from '@/components/admin//SidebarComponents'
-import RowSection from '@/components/admin//RowSection'
+import SidebarGrids from '@/components/admin/SidebarGrids'
+import SidebarComponents from '@/components/admin/SidebarComponents'
+import RowSection from '@/components/admin/RowSection'
 import { dndId, gridToRow, Row, Grid, ComponentInterface, SidebarTabs } from '@/lib/admin/utils'
 
-const PageEditor: React.FC = () => {
-    const [rows, setRows, isLoaded] = useLocalStorage<Row[]>('rows', [])
+const PagesEditor: React.FC<{ slug: string }> = ({ slug }) => {
+    const [rows, setRows, isLoaded] = useLocalStorage<Row[]>(`rows-${slug}`, [])
     const [activeTab, setActiveTab] = useState<SidebarTabs>('elements')
     const grids: Grid[] = [
         { columns: [6, 6] },
@@ -168,4 +168,4 @@ const PageEditor: React.FC = () => {
     )
 }
 
-export default PageEditor
+export default PagesEditor
